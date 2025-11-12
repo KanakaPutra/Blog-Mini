@@ -11,18 +11,42 @@ class ArticleController extends Controller
 {
     public function index()
     {
-        $articles = Article::with(['category', 'user'])->latest()->get();
+        $user = Auth::user();
+
+        if ($user && $user->is_admin == 1) {
+            // LOGIKA SUDAH BENAR:
+            // Admin hanya melihat artikelnya sendiri.
+            // Ini sesuai permintaan "hanya artikel milik si penulis aja yang di tampilin".
+            $articles = Article::with(['category', 'user'])
+                ->where('user_id', $user->id) // <-- Kunci: Hanya ambil artikel milik user yang login
+                ->latest()
+                ->get();
+        } else {
+            // User biasa melihat semua artikel (untuk tampilan publik)
+            $articles = Article::with(['category', 'user'])->latest()->get();
+        }
+
         return view('articles.index', compact('articles'));
     }
 
     public function create()
     {
+        // LOGIKA SUDAH BENAR: Hanya admin yang bisa membuat artikel
+        if (Auth::user()->is_admin != 1) {
+            abort(403, 'Anda tidak memiliki izin untuk membuat artikel.');
+        }
+
         $categories = Category::all();
         return view('articles.create', compact('categories'));
     }
 
     public function store(Request $request)
     {
+        // LOGIKA SUDAH BENAR: Hanya admin yang bisa menyimpan artikel
+        if (Auth::user()->is_admin != 1) {
+            abort(403, 'Anda tidak memiliki izin untuk menambah artikel.');
+        }
+
         $request->validate([
             'title' => 'required',
             'content' => 'required',
@@ -35,7 +59,7 @@ class ArticleController extends Controller
             : null;
 
         Article::create([
-            'user_id' => Auth::id(),
+            'user_id' => Auth::id(), // <-- Kunci: Artikel diikat ke ID user
             'category_id' => $request->category_id,
             'title' => $request->title,
             'content' => $request->input('content'),
@@ -47,12 +71,26 @@ class ArticleController extends Controller
 
     public function edit(Article $article)
     {
+        // LOGIKA SUDAH BENAR:
+        // Cek ini ( $article->user_id !== Auth::id() ) memastikan
+        // Admin2 tidak bisa edit artikel Admin1.
+        if (Auth::user()->is_admin != 1 || $article->user_id !== Auth::id()) {
+            abort(403, 'Anda tidak berhak mengedit artikel ini.');
+        }
+
         $categories = Category::all();
         return view('articles.edit', compact('article', 'categories'));
     }
 
     public function update(Request $request, Article $article)
     {
+        // LOGIKA SUDAH BENAR:
+        // Cek ini ( $article->user_id !== Auth::id() ) memastikan
+        // Admin2 tidak bisa update artikel Admin1.
+        if (Auth::user()->is_admin != 1 || $article->user_id !== Auth::id()) {
+            abort(403, 'Anda tidak berhak memperbarui artikel ini.');
+        }
+
         $request->validate([
             'title' => 'required',
             'content' => 'required',
@@ -73,14 +111,20 @@ class ArticleController extends Controller
 
     public function destroy(Article $article)
     {
+        // LOGIKA SUDAH BENAR:
+        // Cek ini ( $article->user_id !== Auth::id() ) memastikan
+        // Admin2 tidak bisa hapus artikel Admin1.
+        if (Auth::user()->is_admin != 1 || $article->user_id !== Auth::id()) {
+            abort(403, 'Anda tidak berhak menghapus artikel ini.');
+        }
+
         $article->delete();
         return redirect()->route('articles.index')->with('success', 'Artikel berhasil dihapus!');
     }
 
-        public function show(Article $article)
+    public function show(Article $article)
     {
         $article->load(['category', 'user', 'comments.user']);
         return view('articles.show', compact('article'));
     }
-
 }

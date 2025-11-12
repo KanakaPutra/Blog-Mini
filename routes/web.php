@@ -21,26 +21,28 @@ Route::get('/dashboard', function () {
     return view('dashboard', compact('articles'));
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-// 🔹 Route khusus user login: CRUD & komentar
-Route::middleware(['auth'])->group(function () {
+
+// ✅ Hanya Admin Boleh Tambah/Edit/Hapus Artikel
+Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/articles/create', [ArticleController::class, 'create'])->name('articles.create');
     Route::post('/articles', [ArticleController::class, 'store'])->name('articles.store');
     Route::get('/articles/{article}/edit', [ArticleController::class, 'edit'])->name('articles.edit');
     Route::put('/articles/{article}', [ArticleController::class, 'update'])->name('articles.update');
     Route::delete('/articles/{article}', [ArticleController::class, 'destroy'])->name('articles.destroy');
-
-    // komentar butuh login
-    Route::post('/comments', [CommentController::class, 'store'])->name('comments.store');
 });
 
-// 🔹 Route publik untuk membaca artikel (harus DITARUH PALING BAWAH)
-Route::get('/articles/{article}', [ArticleController::class, 'show'])->name('articles.show');
+// 📝 User login boleh memberi komentar
+Route::middleware(['auth'])->group(function () {
+    Route::post('/comments', [CommentController::class, 'store'])->name('comments.store');
 
-// 🔹 Profil pengguna
-Route::middleware('auth')->group(function () {
+    // Profil pengguna
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+
+// 🔹 Route publik untuk membaca artikel (harus DITARUH PALING BAWAH)
+Route::get('/articles/{article}', [ArticleController::class, 'show'])->name('articles.show');
 
 require __DIR__.'/auth.php';
