@@ -21,17 +21,21 @@
                     
                     @if($article->thumbnail)
                         <img src="{{ asset('storage/'.$article->thumbnail) }}" 
-                             class="w-full h-48 object-cover rounded-t-lg">
+                             class="w-full h-48 object-cover rounded-t-lg" 
+                             alt="{{ $article->title }}">
                     @endif
 
                     <div class="p-4 flex flex-col flex-grow">
                         <h2 class="text-lg font-semibold text-gray-800 mb-1">{{ $article->title }}</h2>
-                        <p class="text-sm text-gray-500 mb-2">
+                        <p class="text-sm text-gray-500 mb-1">
                             {{ $article->category->name }} • {{ $article->user->name }}
+                        </p>
+                        <p class="text-xs text-gray-400 mb-3">
+                            Dipublikasikan pada {{ $article->created_at->translatedFormat('d F Y') }}
                         </p>
 
                         <p class="text-gray-700 text-sm flex-grow">
-                            {{ Str::limit($article->content, 120) }}
+                            {{ Str::limit(strip_tags($article->content), 120, '...') }}
                         </p>
 
                         <div class="mt-4 flex justify-between items-center border-t pt-3">
@@ -57,7 +61,7 @@
         </div>
 
         @if($articles->isEmpty())
-            <p class="text-gray-500 mt-10">Belum ada artikel.</p>
+            <p class="text-gray-500 mt-10 text-center">Belum ada artikel.</p>
         @endif
     </div>
 </x-app-layout>

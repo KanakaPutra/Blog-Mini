@@ -3,8 +3,9 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ArticleController;
-use App\Models\Article;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\CategoryController;
+use App\Models\Article;
 
 // 🔹 Halaman utama menampilkan artikel (tanpa login)
 Route::get('/', function () {
@@ -44,5 +45,10 @@ Route::middleware(['auth'])->group(function () {
 
 // 🔹 Route publik untuk membaca artikel (harus DITARUH PALING BAWAH)
 Route::get('/articles/{article}', [ArticleController::class, 'show'])->name('articles.show');
+
+
+// ✅ Route untuk kategori (buat dropdown “Index” di navbar)
+Route::get('/category/{id}', [CategoryController::class, 'show'])->name('category.show');
+
 
 require __DIR__.'/auth.php';
