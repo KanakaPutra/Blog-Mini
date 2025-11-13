@@ -35,9 +35,6 @@ jobs:
           node-version: 22
           cache: 'npm'
 
-      - name: Add FluxUI Credentials
-        run: composer config http-basic.composer.fluxui.dev "${{ secrets.FLUX_USERNAME }}" "${{ secrets.FLUX_LICENSE_KEY }}"
-
       - name: Install Dependencies
         run: |
           composer install --no-interaction --no-progress --prefer-dist
