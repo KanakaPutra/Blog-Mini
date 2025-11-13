@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             // tambahkan kolom banned
-            if (!Schema::hasColumn('users', 'banned')) {
+            if (! Schema::hasColumn('users', 'banned')) {
                 $table->boolean('banned')->default(false)->after('is_admin');
             }
         });

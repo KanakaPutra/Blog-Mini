@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Article;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
 class HomeController extends Controller
@@ -19,7 +18,7 @@ class HomeController extends Controller
                 'x-rapidapi-key' => 'd243538abamsh53f12e467468e89p13d16fjsn9c6bead9a415',
                 'x-rapidapi-host' => 'binance43.p.rapidapi.com',
             ])->get('https://binance43.p.rapidapi.com/ticker/24hr', [
-                'symbol' => 'BTCUSDT'
+                'symbol' => 'BTCUSDT',
             ]);
 
             $data = $response->json();
@@ -43,6 +42,7 @@ class HomeController extends Controller
     public function show(Article $article)
     {
         $article->load(['comments.user', 'category', 'user']);
+
         return view('articles.show', compact('article'));
     }
 }

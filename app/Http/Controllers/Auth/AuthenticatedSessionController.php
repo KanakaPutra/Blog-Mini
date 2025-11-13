@@ -46,10 +46,6 @@ class AuthenticatedSessionController extends Controller
     }
 }
 
-
-
-
-
 // <?php
 
 // namespace App\Http\Controllers\Auth;

@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Models\User;
 
 class SuperAdminController extends Controller
 {
@@ -39,7 +39,7 @@ class SuperAdminController extends Controller
      */
     public function ban(User $user)
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return back()->with('error', 'Anda harus login terlebih dahulu.');
         }
 
@@ -61,7 +61,7 @@ class SuperAdminController extends Controller
      */
     public function unban(User $user)
     {
-        if (!Auth::check()) {
+        if (! Auth::check()) {
             return back()->with('error', 'Anda harus login terlebih dahulu.');
         }
 

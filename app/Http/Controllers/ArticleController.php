@@ -38,6 +38,7 @@ class ArticleController extends Controller
         }
 
         $categories = Category::all();
+
         return view('articles.create', compact('categories'));
     }
 
@@ -76,12 +77,14 @@ class ArticleController extends Controller
         // 🟢 Super admin boleh edit artikel siapa pun
         if ($user->is_admin == 2) {
             $categories = Category::all();
+
             return view('articles.edit', compact('article', 'categories'));
         }
 
         // Admin hanya boleh edit artikelnya sendiri
         if ($user->is_admin == 1 && $article->user_id === $user->id) {
             $categories = Category::all();
+
             return view('articles.edit', compact('article', 'categories'));
         }
 
@@ -122,6 +125,7 @@ class ArticleController extends Controller
         // 🟢 Super admin boleh hapus artikel siapa pun
         if ($user->is_admin == 2 || ($user->is_admin == 1 && $article->user_id === $user->id)) {
             $article->delete();
+
             return redirect()->route('articles.index')->with('success', 'Artikel berhasil dihapus!');
         }
 
@@ -131,6 +135,7 @@ class ArticleController extends Controller
     public function show(Article $article)
     {
         $article->load(['category', 'user', 'comments.user']);
+
         return view('articles.show', compact('article'));
     }
 }

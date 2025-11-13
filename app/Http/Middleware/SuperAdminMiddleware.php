@@ -13,7 +13,7 @@ class SuperAdminMiddleware
      */
     public function handle(Request $request, Closure $next)
     {
-        if (!Auth::check() || Auth::user()->is_admin != 2) {
+        if (! Auth::check() || Auth::user()->is_admin != 2) {
             // Jika bukan super admin, redirect ke dashboard biasa
             return redirect()->route('dashboard')->with('error', 'Access denied.');
         }

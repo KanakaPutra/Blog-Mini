@@ -1,14 +1,14 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ArticleController;
-use App\Http\Controllers\CommentController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CommentController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SuperAdminController;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Http\Request;
 use App\Models\Article;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,7 +40,7 @@ Route::get('/', function () {
 })->name('home');
 
 // 🔹 Alias ke home
-Route::get('/welcome', fn() => redirect()->route('home'))->name('welcome');
+Route::get('/welcome', fn () => redirect()->route('home'))->name('welcome');
 
 // 🔹 Artikel publik
 Route::get('/articles', [ArticleController::class, 'index'])->name('articles.index');
@@ -129,4 +129,4 @@ Route::get('/two-factor', function () {
     return view('auth.two-factor');
 })->name('two-factor.show');
 
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';
