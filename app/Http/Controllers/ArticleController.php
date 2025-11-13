@@ -14,15 +14,16 @@ class ArticleController extends Controller
         $user = Auth::user();
 
         if ($user && $user->is_admin == 1) {
-            // LOGIKA SUDAH BENAR:
-            // Admin hanya melihat artikelnya sendiri.
-            // Ini sesuai permintaan "hanya artikel milik si penulis aja yang di tampilin".
+            // Admin hanya melihat artikelnya sendiri
             $articles = Article::with(['category', 'user'])
-                ->where('user_id', $user->id) // <-- Kunci: Hanya ambil artikel milik user yang login
+                ->where('user_id', $user->id)
                 ->latest()
                 ->get();
+        } elseif ($user && $user->is_admin == 2) {
+            // 🟢 Super Admin melihat semua artikel
+            $articles = Article::with(['category', 'user'])->latest()->get();
         } else {
-            // User biasa melihat semua artikel (untuk tampilan publik)
+            // User biasa melihat semua artikel (publik)
             $articles = Article::with(['category', 'user'])->latest()->get();
         }
 
@@ -31,8 +32,8 @@ class ArticleController extends Controller
 
     public function create()
     {
-        // LOGIKA SUDAH BENAR: Hanya admin yang bisa membuat artikel
-        if (Auth::user()->is_admin != 1) {
+        // 🟢 Super admin dan admin boleh buat artikel
+        if (Auth::user()->is_admin < 1) {
             abort(403, 'Anda tidak memiliki izin untuk membuat artikel.');
         }
 
@@ -42,8 +43,7 @@ class ArticleController extends Controller
 
     public function store(Request $request)
     {
-        // LOGIKA SUDAH BENAR: Hanya admin yang bisa menyimpan artikel
-        if (Auth::user()->is_admin != 1) {
+        if (Auth::user()->is_admin < 1) {
             abort(403, 'Anda tidak memiliki izin untuk menambah artikel.');
         }
 
@@ -59,7 +59,7 @@ class ArticleController extends Controller
             : null;
 
         Article::create([
-            'user_id' => Auth::id(), // <-- Kunci: Artikel diikat ke ID user
+            'user_id' => Auth::id(),
             'category_id' => $request->category_id,
             'title' => $request->title,
             'content' => $request->input('content'),
@@ -71,55 +71,61 @@ class ArticleController extends Controller
 
     public function edit(Article $article)
     {
-        // LOGIKA SUDAH BENAR:
-        // Cek ini ( $article->user_id !== Auth::id() ) memastikan
-        // Admin2 tidak bisa edit artikel Admin1.
-        if (Auth::user()->is_admin != 1 || $article->user_id !== Auth::id()) {
-            abort(403, 'Anda tidak berhak mengedit artikel ini.');
+        $user = Auth::user();
+
+        // 🟢 Super admin boleh edit artikel siapa pun
+        if ($user->is_admin == 2) {
+            $categories = Category::all();
+            return view('articles.edit', compact('article', 'categories'));
         }
 
-        $categories = Category::all();
-        return view('articles.edit', compact('article', 'categories'));
+        // Admin hanya boleh edit artikelnya sendiri
+        if ($user->is_admin == 1 && $article->user_id === $user->id) {
+            $categories = Category::all();
+            return view('articles.edit', compact('article', 'categories'));
+        }
+
+        abort(403, 'Anda tidak berhak mengedit artikel ini.');
     }
 
     public function update(Request $request, Article $article)
     {
-        // LOGIKA SUDAH BENAR:
-        // Cek ini ( $article->user_id !== Auth::id() ) memastikan
-        // Admin2 tidak bisa update artikel Admin1.
-        if (Auth::user()->is_admin != 1 || $article->user_id !== Auth::id()) {
-            abort(403, 'Anda tidak berhak memperbarui artikel ini.');
+        $user = Auth::user();
+
+        // 🟢 Super admin boleh update artikel siapa pun
+        if ($user->is_admin == 2 || ($user->is_admin == 1 && $article->user_id === $user->id)) {
+            $request->validate([
+                'title' => 'required',
+                'content' => 'required',
+                'category_id' => 'required|exists:categories,id',
+                'thumbnail' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            ]);
+
+            $data = $request->only('title', 'content', 'category_id');
+
+            if ($request->hasFile('thumbnail')) {
+                $data['thumbnail'] = $request->file('thumbnail')->store('thumbnails', 'public');
+            }
+
+            $article->update($data);
+
+            return redirect()->route('articles.index')->with('success', 'Artikel berhasil diperbarui!');
         }
 
-        $request->validate([
-            'title' => 'required',
-            'content' => 'required',
-            'category_id' => 'required|exists:categories,id',
-            'thumbnail' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
-        ]);
-
-        $data = $request->only('title', 'content', 'category_id');
-
-        if ($request->hasFile('thumbnail')) {
-            $data['thumbnail'] = $request->file('thumbnail')->store('thumbnails', 'public');
-        }
-
-        $article->update($data);
-
-        return redirect()->route('articles.index')->with('success', 'Artikel berhasil diperbarui!');
+        abort(403, 'Anda tidak berhak memperbarui artikel ini.');
     }
 
     public function destroy(Article $article)
     {
-        // LOGIKA SUDAH BENAR:
-        // Cek ini ( $article->user_id !== Auth::id() ) memastikan
-        // Admin2 tidak bisa hapus artikel Admin1.
-        if (Auth::user()->is_admin != 1 || $article->user_id !== Auth::id()) {
-            abort(403, 'Anda tidak berhak menghapus artikel ini.');
+        $user = Auth::user();
+
+        // 🟢 Super admin boleh hapus artikel siapa pun
+        if ($user->is_admin == 2 || ($user->is_admin == 1 && $article->user_id === $user->id)) {
+            $article->delete();
+            return redirect()->route('articles.index')->with('success', 'Artikel berhasil dihapus!');
         }
 
-        $article->delete();
-        return redirect()->route('articles.index')->with('success', 'Artikel berhasil dihapus!');
+        abort(403, 'Anda tidak berhak menghapus artikel ini.');
     }
 
     public function show(Article $article)

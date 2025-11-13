@@ -9,7 +9,8 @@ class IsAdmin
 {
     public function handle($request, Closure $next)
     {
-        if (!Auth::check() || Auth::user()->is_admin != 1) {
+        // cek admin biasa atau super admin
+        if (!Auth::check() || (Auth::user()->is_admin != 1 && Auth::user()->is_admin != 2)) {
             abort(403, 'Akses ditolak! Anda bukan admin.');
         }
 

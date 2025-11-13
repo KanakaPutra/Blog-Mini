@@ -7,7 +7,7 @@
             </h1>
 
             @auth
-                @if(auth()->user()->is_admin == 1)
+                @if(auth()->user()->is_admin >= 1)
                     <a href="{{ route('articles.create') }}"
                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition">
                        + Tambah Artikel
@@ -48,24 +48,26 @@
                                Lihat Selengkapnya
                             </a>
 
-                            @if(auth()->check() && auth()->user()->is_admin == 1)
-                                <div class="flex gap-3 items-center">
-                                    <a href="{{ route('articles.edit', $article->id) }}" 
-                                       class="text-blue-600 hover:underline text-sm font-medium">
-                                       Edit
-                                    </a>
+                            @auth
+                                @if(auth()->user()->is_admin == 2 || auth()->user()->id == $article->user_id)
+                                    <div class="flex gap-3 items-center">
+                                        <a href="{{ route('articles.edit', $article->id) }}" 
+                                           class="text-blue-600 hover:underline text-sm font-medium">
+                                           Edit
+                                        </a>
 
-                                    <form action="{{ route('articles.destroy', $article->id) }}" method="POST"
-                                          onsubmit="return confirm('Yakin hapus artikel ini?')"
-                                          class="m-0">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="text-red-600 hover:underline text-sm font-medium">
-                                            Hapus
-                                        </button>
-                                    </form>
-                                </div>
-                            @endif
+                                        <form action="{{ route('articles.destroy', $article->id) }}" method="POST"
+                                              onsubmit="return confirm('Yakin hapus artikel ini?')"
+                                              class="m-0">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-red-600 hover:underline text-sm font-medium">
+                                                Hapus
+                                            </button>
+                                        </form>
+                                    </div>
+                                @endif
+                            @endauth
                         </div>
                     </div>
                 </div>

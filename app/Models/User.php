@@ -16,8 +16,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        // ✅ Tambahkan ini jika kamu ingin bisa set admin lewat form/database seeder
         'is_admin',
+        'banned', // ✅ tambahkan agar bisa mass assign banned user
     ];
 
     protected $hidden = [
@@ -32,9 +32,8 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
-
-            // ✅ Penting: agar Laravel mengenali is_admin sebagai boolean
-            'is_admin' => 'boolean',
+            'is_admin' => 'integer',
+            'banned' => 'boolean', // ✅ supaya otomatis boolean true/false
         ];
     }
 
@@ -56,5 +55,11 @@ class User extends Authenticatable
     public function comments()
     {
         return $this->hasMany(Comment::class);
+    }
+
+    // ✅ Helper method: cek apakah user dibanned
+    public function isBanned(): bool
+    {
+        return $this->banned === true;
     }
 }

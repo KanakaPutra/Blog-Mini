@@ -1,10 +1,11 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\SuperAdminController;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Http;
 use App\Models\Article;
 
@@ -38,14 +39,12 @@ Route::get('/', function () {
 })->name('home');
 
 // 🔹 Halaman welcome (alias)
-Route::get('/welcome', function () {
-    return redirect()->route('home');
-})->name('welcome');
+Route::get('/welcome', fn() => redirect()->route('home'))->name('welcome');
 
 // 🔹 Daftar artikel (publik)
 Route::get('/articles', [ArticleController::class, 'index'])->name('articles.index');
 
-// 🔹 Route khusus admin (CRUD artikelnya sendiri)
+// 🔹 Route CRUD untuk admin biasa
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/articles/create', [ArticleController::class, 'create'])->name('articles.create');
     Route::post('/articles', [ArticleController::class, 'store'])->name('articles.store');
@@ -56,10 +55,10 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
 // 🔹 Route publik baca artikel tunggal
 Route::get('/articles/{article}', [ArticleController::class, 'show'])
-    ->whereNumber('article') // Pastikan hanya ID numerik
+    ->whereNumber('article')
     ->name('articles.show');
 
-// 🔹 Dashboard (khusus user login)
+// 🔹 Dashboard user login
 Route::get('/dashboard', function () {
     $articles = Article::with(['category', 'user', 'comments'])->latest()->get();
 
@@ -82,7 +81,7 @@ Route::get('/dashboard', function () {
     return view('dashboard', compact('articles', 'btcPrice', 'btcChange'));
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-// 📝 Route untuk komentar & profil (user login)
+// 🔹 Komentar & Profil (user login)
 Route::middleware(['auth'])->group(function () {
     Route::post('/comments', [CommentController::class, 'store'])->name('comments.store');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -90,7 +89,17 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// 🔹 Route untuk kategori (dropdown navbar)
+// 🔹 Route kategori (navbar)
 Route::get('/category/{id}', [CategoryController::class, 'show'])->name('category.show');
+
+// 🔹 Route khusus Super Admin
+Route::middleware(['auth', 'superadmin'])->prefix('superadmin')->name('superadmin.')->group(function () {
+    Route::get('/users', [SuperAdminController::class, 'users'])->name('users');
+    Route::get('/settings', [SuperAdminController::class, 'settings'])->name('settings');
+
+    // ✅ Fitur ban/unban user
+    Route::patch('/users/{user}/ban', [SuperAdminController::class, 'ban'])->name('users.ban');
+    Route::patch('/users/{user}/unban', [SuperAdminController::class, 'unban'])->name('users.unban');
+});
 
 require __DIR__ . '/auth.php';

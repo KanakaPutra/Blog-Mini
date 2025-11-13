@@ -6,6 +6,7 @@ use Illuminate\Foundation\Configuration\Middleware;
 
 // ✅ Tambahkan baris ini
 use App\Http\Middleware\IsAdmin;
+use App\Http\Middleware\SuperAdminMiddleware;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -15,9 +16,10 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
 
-        // ✅ Daftarkan middleware admin di sini
+        // ✅ Daftarkan middleware admin dan superadmin di sini
         $middleware->alias([
             'admin' => IsAdmin::class,
+            'superadmin' => SuperAdminMiddleware::class,
         ]);
 
     })
