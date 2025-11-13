@@ -5,25 +5,47 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\CategoryController;
+use Illuminate\Support\Facades\Http;
 use App\Models\Article;
 
-// 🔹 Halaman utama menampilkan artikel (tanpa login)
+/*
+|--------------------------------------------------------------------------
+| Web Routes
+|--------------------------------------------------------------------------
+*/
+
+// 🔹 Halaman utama (publik)
 Route::get('/', function () {
-    $articles = Article::with(['category', 'user', 'comments'])->latest()->get();
-    return view('articles.index', compact('articles'));
+    $articles = Article::with(['category', 'user'])->latest()->get();
+
+    try {
+        $response = Http::withHeaders([
+            'x-rapidapi-key' => 'd243538abamsh53f12e467468e89p13d16fjsn9c6bead9a415',
+            'x-rapidapi-host' => 'binance43.p.rapidapi.com',
+        ])->get('https://binance43.p.rapidapi.com/ticker/24hr', [
+            'symbol' => 'BTCUSDT',
+        ]);
+
+        $data = $response->json();
+        $btcPrice = $data['lastPrice'] ?? 'N/A';
+        $btcChange = $data['priceChangePercent'] ?? '0';
+    } catch (\Exception $e) {
+        $btcPrice = 'N/A';
+        $btcChange = '0';
+    }
+
+    return view('welcome', compact('articles', 'btcPrice', 'btcChange'));
 })->name('home');
 
-// 🔹 Route publik: semua orang bisa lihat daftar artikel
+// 🔹 Halaman welcome (alias)
+Route::get('/welcome', function () {
+    return redirect()->route('home');
+})->name('welcome');
+
+// 🔹 Daftar artikel (publik)
 Route::get('/articles', [ArticleController::class, 'index'])->name('articles.index');
 
-// 🔹 Dashboard (khusus user login)
-Route::get('/dashboard', function () {
-    $articles = Article::with(['category', 'user', 'comments'])->latest()->get();
-    return view('dashboard', compact('articles'));
-})->middleware(['auth', 'verified'])->name('dashboard');
-
-
-// ✅ Hanya Admin Boleh Tambah/Edit/Hapus Artikel
+// 🔹 Route khusus admin (CRUD artikelnya sendiri)
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/articles/create', [ArticleController::class, 'create'])->name('articles.create');
     Route::post('/articles', [ArticleController::class, 'store'])->name('articles.store');
@@ -32,23 +54,43 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::delete('/articles/{article}', [ArticleController::class, 'destroy'])->name('articles.destroy');
 });
 
-// 📝 User login boleh memberi komentar
+// 🔹 Route publik baca artikel tunggal
+Route::get('/articles/{article}', [ArticleController::class, 'show'])
+    ->whereNumber('article') // Pastikan hanya ID numerik
+    ->name('articles.show');
+
+// 🔹 Dashboard (khusus user login)
+Route::get('/dashboard', function () {
+    $articles = Article::with(['category', 'user', 'comments'])->latest()->get();
+
+    try {
+        $response = Http::withHeaders([
+            'x-rapidapi-key' => 'd243538abamsh53f12e467468e89p13d16fjsn9c6bead9a415',
+            'x-rapidapi-host' => 'binance43.p.rapidapi.com',
+        ])->get('https://binance43.p.rapidapi.com/ticker/24hr', [
+            'symbol' => 'BTCUSDT',
+        ]);
+
+        $data = $response->json();
+        $btcPrice = $data['lastPrice'] ?? 'N/A';
+        $btcChange = $data['priceChangePercent'] ?? '0';
+    } catch (\Exception $e) {
+        $btcPrice = 'N/A';
+        $btcChange = '0';
+    }
+
+    return view('dashboard', compact('articles', 'btcPrice', 'btcChange'));
+})->middleware(['auth', 'verified'])->name('dashboard');
+
+// 📝 Route untuk komentar & profil (user login)
 Route::middleware(['auth'])->group(function () {
     Route::post('/comments', [CommentController::class, 'store'])->name('comments.store');
-
-    // Profil pengguna
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-
-// 🔹 Route publik untuk membaca artikel (harus DITARUH PALING BAWAH)
-Route::get('/articles/{article}', [ArticleController::class, 'show'])->name('articles.show');
-
-
-// ✅ Route untuk kategori (buat dropdown “Index” di navbar)
+// 🔹 Route untuk kategori (dropdown navbar)
 Route::get('/category/{id}', [CategoryController::class, 'show'])->name('category.show');
 
-
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
