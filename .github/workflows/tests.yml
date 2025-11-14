@@ -2,13 +2,9 @@ name: tests
 
 on:
   push:
-    branches:
-      - develop
-      - main
+    branches: [develop, main]
   pull_request:
-    branches:
-      - develop
-      - main
+    branches: [develop, main]
 
 jobs:
   ci:
@@ -41,15 +37,15 @@ jobs:
       - name: Setup Environment (.env)
         run: |
           cp .env.example .env
-          sed -i "s/^APP_KEY=.*/APP_KEY=${{ secrets.APP_KEY }}/" .env
+          sed -i "s|^APP_KEY=.*|APP_KEY=${{ secrets.APP_KEY }}|" .env
           echo "APP_ENV=testing" >> .env
 
       - name: Setup SQLite Database
         run: |
           mkdir -p database
           touch database/database.sqlite
-          echo "DB_CONNECTION=sqlite" >> .env
-          echo "DB_DATABASE=$(pwd)/database/database.sqlite" >> .env
+          sed -i "s|^DB_CONNECTION=.*|DB_CONNECTION=sqlite|" .env
+          sed -i "s|^DB_DATABASE=.*|DB_DATABASE=$(pwd)/database/database.sqlite|" .env
 
       - name: Run Migrations
         run: php artisan migrate --force
