@@ -37,7 +37,8 @@ jobs:
       - name: Setup Environment (.env)
         run: |
           cp .env.example .env
-          sed -i "s|^APP_KEY=.*|APP_KEY=${{ secrets.APP_KEY }}|" .env
+          sed -i '/^APP_KEY=/d' .env
+          echo "APP_KEY=${{ secrets.APP_KEY }}" >> .env
           echo "APP_ENV=testing" >> .env
 
       - name: Setup SQLite Database
