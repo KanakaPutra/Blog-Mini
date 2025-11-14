@@ -6,7 +6,6 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SuperAdminController;
 use App\Models\Article;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
 
@@ -42,12 +41,10 @@ Route::get('/', function () {
 // 🔹 Alias ke home
 Route::get('/welcome', fn () => redirect()->route('home'))->name('welcome');
 
-
 // ======================================================
 // 🔹 Artikel publik + support filter "Artikel Saya"
 // ======================================================
 Route::get('/articles', [ArticleController::class, 'index'])->name('articles.index');
-
 
 // ======================================================
 // 🔹 CRUD Artikel untuk admin biasa (is_admin >= 1)
@@ -60,12 +57,10 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::delete('/articles/{article}', [ArticleController::class, 'destroy'])->name('articles.destroy');
 });
 
-
 // 🔹 Artikel tunggal
 Route::get('/articles/{article}', [ArticleController::class, 'show'])
     ->whereNumber('article')
     ->name('articles.show');
-
 
 // ======================================================
 // 🔹 Dashboard
@@ -92,7 +87,6 @@ Route::get('/dashboard', function () {
     return view('dashboard', compact('articles', 'btcPrice', 'btcChange'));
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-
 // ======================================================
 // 🔹 Komentar & Profil (user login)
 // ======================================================
@@ -103,10 +97,8 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-
 // 🔹 Route kategori (navbar)
 Route::get('/category/{id}', [CategoryController::class, 'show'])->name('category.show');
-
 
 // ======================================================
 // 🔹 SUPER ADMIN AREA
@@ -122,7 +114,6 @@ Route::middleware(['auth', 'superadmin'])
         Route::patch('/users/{user}/ban', [SuperAdminController::class, 'ban'])->name('users.ban');
         Route::patch('/users/{user}/unban', [SuperAdminController::class, 'unban'])->name('users.unban');
     });
-
 
 // ======================================================
 // 🔹 Dummy routes untuk CI test

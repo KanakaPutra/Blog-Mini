@@ -30,7 +30,6 @@ class ArticleController extends Controller
             return view('articles.index', compact('articles'));
         }
 
-
         // =========================================================
         // 🔹 ADMIN (is_admin = 1) → hanya artikelnya sendiri
         // =========================================================
@@ -43,7 +42,6 @@ class ArticleController extends Controller
             return view('articles.index', compact('articles'));
         }
 
-
         // =========================================================
         // 🔹 User biasa (is_admin = 0) → semua artikel publik
         // =========================================================
@@ -51,8 +49,6 @@ class ArticleController extends Controller
 
         return view('articles.index', compact('articles'));
     }
-
-
 
     public function create()
     {
@@ -64,8 +60,6 @@ class ArticleController extends Controller
 
         return view('articles.create', compact('categories'));
     }
-
-
 
     public function store(Request $request)
     {
@@ -93,8 +87,6 @@ class ArticleController extends Controller
         return redirect()->route('articles.index')->with('success', 'Artikel berhasil ditambahkan!');
     }
 
-
-
     public function edit(Article $article)
     {
         $user = Auth::user();
@@ -102,19 +94,19 @@ class ArticleController extends Controller
         // Super admin bebas edit
         if ($user->is_admin == 2) {
             $categories = Category::all();
+
             return view('articles.edit', compact('article', 'categories'));
         }
 
         // Admin cuma edit artikel sendiri
         if ($user->is_admin == 1 && $article->user_id == $user->id) {
             $categories = Category::all();
+
             return view('articles.edit', compact('article', 'categories'));
         }
 
         abort(403, 'Anda tidak berhak mengedit artikel ini.');
     }
-
-
 
     public function update(Request $request, Article $article)
     {
@@ -143,21 +135,18 @@ class ArticleController extends Controller
         abort(403, 'Anda tidak berhak memperbarui artikel ini.');
     }
 
-
-
     public function destroy(Article $article)
     {
         $user = Auth::user();
 
         if ($user->is_admin == 2 || ($user->is_admin == 1 && $article->user_id == $user->id)) {
             $article->delete();
+
             return redirect()->route('articles.index')->with('success', 'Artikel berhasil dihapus!');
         }
 
         abort(403, 'Anda tidak berhak menghapus artikel ini.');
     }
-
-
 
     public function show(Article $article)
     {
