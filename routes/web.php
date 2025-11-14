@@ -42,10 +42,16 @@ Route::get('/', function () {
 // 🔹 Alias ke home
 Route::get('/welcome', fn () => redirect()->route('home'))->name('welcome');
 
-// 🔹 Artikel publik
+
+// ======================================================
+// 🔹 Artikel publik + support filter "Artikel Saya"
+// ======================================================
 Route::get('/articles', [ArticleController::class, 'index'])->name('articles.index');
 
-// 🔹 Route CRUD untuk admin biasa
+
+// ======================================================
+// 🔹 CRUD Artikel untuk admin biasa (is_admin >= 1)
+// ======================================================
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/articles/create', [ArticleController::class, 'create'])->name('articles.create');
     Route::post('/articles', [ArticleController::class, 'store'])->name('articles.store');
@@ -54,12 +60,16 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::delete('/articles/{article}', [ArticleController::class, 'destroy'])->name('articles.destroy');
 });
 
+
 // 🔹 Artikel tunggal
 Route::get('/articles/{article}', [ArticleController::class, 'show'])
     ->whereNumber('article')
     ->name('articles.show');
 
+
+// ======================================================
 // 🔹 Dashboard
+// ======================================================
 Route::get('/dashboard', function () {
     $articles = Article::with(['category', 'user', 'comments'])->latest()->get();
 
@@ -82,7 +92,10 @@ Route::get('/dashboard', function () {
     return view('dashboard', compact('articles', 'btcPrice', 'btcChange'));
 })->middleware(['auth', 'verified'])->name('dashboard');
 
+
+// ======================================================
 // 🔹 Komentar & Profil (user login)
+// ======================================================
 Route::middleware(['auth'])->group(function () {
     Route::post('/comments', [CommentController::class, 'store'])->name('comments.store');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -90,10 +103,14 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+
 // 🔹 Route kategori (navbar)
 Route::get('/category/{id}', [CategoryController::class, 'show'])->name('category.show');
 
-// 🔹 Route khusus Super Admin
+
+// ======================================================
+// 🔹 SUPER ADMIN AREA
+// ======================================================
 Route::middleware(['auth', 'superadmin'])
     ->prefix('superadmin')
     ->name('superadmin.')
@@ -101,32 +118,21 @@ Route::middleware(['auth', 'superadmin'])
         Route::get('/users', [SuperAdminController::class, 'users'])->name('users');
         Route::get('/settings', [SuperAdminController::class, 'settings'])->name('settings');
 
-        // ✅ Fitur ban/unban user
+        // Ban / unban user
         Route::patch('/users/{user}/ban', [SuperAdminController::class, 'ban'])->name('users.ban');
         Route::patch('/users/{user}/unban', [SuperAdminController::class, 'unban'])->name('users.unban');
     });
 
-/*
-|--------------------------------------------------------------------------
-| Fallback Routes for Missing Named Routes in Tests
-|--------------------------------------------------------------------------
-|
-| Tambahan ini mencegah RouteNotFoundException saat CI/CD test dijalankan.
-| Biasanya test Jetstream/Fortify cari route: login.store, user-password.edit, two-factor.show
-|
-*/
 
-Route::post('/login', function (Request $request) {
-    // dummy login endpoint untuk testing
-    return redirect()->route('dashboard');
-})->name('login.store');
+// ======================================================
+// 🔹 Dummy routes untuk CI test
+// ======================================================
+Route::post('/login', fn () => redirect()->route('dashboard'))->name('login.store');
 
-Route::get('/user/password/edit', function () {
-    return view('auth.passwords.edit');
-})->name('user-password.edit');
+Route::get('/user/password/edit', fn () => view('auth.passwords.edit'))
+    ->name('user-password.edit');
 
-Route::get('/two-factor', function () {
-    return view('auth.two-factor');
-})->name('two-factor.show');
+Route::get('/two-factor', fn () => view('auth.two-factor'))
+    ->name('two-factor.show');
 
 require __DIR__.'/auth.php';
