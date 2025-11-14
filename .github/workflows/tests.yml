@@ -2,9 +2,13 @@ name: tests
 
 on:
   push:
-    branches: [develop, main]
+    branches:
+      - develop
+      - main
   pull_request:
-    branches: [develop, main]
+    branches:
+      - develop
+      - main
 
 jobs:
   ci:
@@ -34,19 +38,18 @@ jobs:
       - name: Install PHP Dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
-      - name: Setup Environment (.env)
-        run: |
-          cp .env.example .env
-          sed -i '/^APP_KEY=/d' .env
-          echo "APP_KEY=${{ secrets.APP_KEY }}" >> .env
-          echo "APP_ENV=testing" >> .env
+      - name: Copy Environment File
+        run: cp .env.example .env
+
+      - name: Generate Application Key
+        run: php artisan key:generate
 
       - name: Setup SQLite Database
         run: |
           mkdir -p database
           touch database/database.sqlite
-          sed -i "s|^DB_CONNECTION=.*|DB_CONNECTION=sqlite|" .env
-          sed -i "s|^DB_DATABASE=.*|DB_DATABASE=$(pwd)/database/database.sqlite|" .env
+          echo "DB_CONNECTION=sqlite" >> .env
+          echo "DB_DATABASE=$(pwd)/database/database.sqlite" >> .env
 
       - name: Run Migrations
         run: php artisan migrate --force
@@ -55,6 +58,4 @@ jobs:
         run: npm run build
 
       - name: Run Tests
-        env:
-          APP_KEY: ${{ secrets.APP_KEY }}
         run: ./vendor/bin/pest
