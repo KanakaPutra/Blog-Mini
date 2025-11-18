@@ -42,6 +42,13 @@ Route::get('/', function () {
 Route::get('/welcome', fn () => redirect()->route('home'))->name('welcome');
 
 // ======================================================
+// 🔹 Category
+// ======================================================
+Route::middleware(['auth', 'superadmin'])->group(function () {
+    Route::resource('categories', CategoryController::class);
+});
+
+// ======================================================
 // 🔹 Artikel publik + support filter "Artikel Saya"
 // ======================================================
 Route::get('/articles', [ArticleController::class, 'index'])->name('articles.index');

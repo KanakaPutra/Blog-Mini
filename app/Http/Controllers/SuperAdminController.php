@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Category;
+use App\Models\Article;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -31,7 +33,29 @@ class SuperAdminController extends Controller
      */
     public function settings()
     {
-        return view('superadmin.settings');
+        // Semua kategori untuk CRUD kategori
+        $categories = Category::all();
+
+        // Statistik user
+        $userCount = User::count();
+        $superAdminCount = User::where('is_admin', 2)->count();
+        $adminCount = User::where('is_admin', 1)->count();
+        $normalUserCount = User::where('is_admin', 0)->count();
+
+        // Statistik artikel per user
+        $articlePerUser = Article::select('user_id')
+            ->selectRaw('count(*) as total')
+            ->groupBy('user_id')
+            ->pluck('total', 'user_id');
+
+        return view('superadmin.settings', compact(
+            'categories',
+            'userCount',
+            'superAdminCount',
+            'adminCount',
+            'normalUserCount',
+            'articlePerUser'
+        ));
     }
 
     /**
