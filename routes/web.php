@@ -20,16 +20,13 @@ Route::get('/', function () {
     $articles = Article::with(['category', 'user'])->latest()->get();
 
     try {
-        $response = Http::withHeaders([
-            'x-rapidapi-key' => 'd243538abamsh53f12e467468e89p13d16fjsn9c6bead9a415',
-            'x-rapidapi-host' => 'binance43.p.rapidapi.com',
-        ])->get('https://binance43.p.rapidapi.com/ticker/24hr', [
-            'symbol' => 'BTCUSDT',
-        ]);
+        // API Bitcoin GRATIS (NO API KEY)
+        $response = Http::get('https://api.alternative.me/v2/ticker/1/');
 
         $data = $response->json();
-        $btcPrice = $data['lastPrice'] ?? 'N/A';
-        $btcChange = $data['priceChangePercent'] ?? '0';
+        $btcPrice = $data['data']['1']['quotes']['USD']['price'] ?? 'N/A';
+        $btcChange = $data['data']['1']['quotes']['USD']['percent_change_24h'] ?? '0';
+
     } catch (\Exception $e) {
         $btcPrice = 'N/A';
         $btcChange = '0';
@@ -57,11 +54,16 @@ Route::get('/articles', [ArticleController::class, 'index'])->name('articles.ind
 // 🔹 CRUD Artikel untuk admin biasa (is_admin >= 1)
 // ======================================================
 Route::middleware(['auth', 'admin'])->group(function () {
-    Route::get('/articles/create', [ArticleController::class, 'create'])->name('articles.create');
-    Route::post('/articles', [ArticleController::class, 'store'])->name('articles.store');
-    Route::get('/articles/{article}/edit', [ArticleController::class, 'edit'])->name('articles.edit');
-    Route::put('/articles/{article}', [ArticleController::class, 'update'])->name('articles.update');
-    Route::delete('/articles/{article}', [ArticleController::class, 'destroy'])->name('articles.destroy');
+    Route::get('/articles/create', [ArticleController::class, 'create'])
+        ->name('articles.create');
+    Route::post('/articles', [ArticleController::class, 'store'])
+        ->name('articles.store');
+    Route::get('/articles/{article}/edit', [ArticleController::class, 'edit'])
+        ->name('articles.edit');
+    Route::put('/articles/{article}', [ArticleController::class, 'update'])
+        ->name('articles.update');
+    Route::delete('/articles/{article}', [ArticleController::class, 'destroy'])
+        ->name('articles.destroy');
 });
 
 // 🔹 Artikel tunggal
@@ -76,16 +78,13 @@ Route::get('/dashboard', function () {
     $articles = Article::with(['category', 'user', 'comments'])->latest()->get();
 
     try {
-        $response = Http::withHeaders([
-            'x-rapidapi-key' => 'd243538abamsh53f12e467468e89p13d16fjsn9c6bead9a415',
-            'x-rapidapi-host' => 'binance43.p.rapidapi.com',
-        ])->get('https://binance43.p.rapidapi.com/ticker/24hr', [
-            'symbol' => 'BTCUSDT',
-        ]);
+        // API Bitcoin GRATIS
+        $response = Http::get('https://api.alternative.me/v2/ticker/1/');
 
         $data = $response->json();
-        $btcPrice = $data['lastPrice'] ?? 'N/A';
-        $btcChange = $data['priceChangePercent'] ?? '0';
+        $btcPrice = $data['data']['1']['quotes']['USD']['price'] ?? 'N/A';
+        $btcChange = $data['data']['1']['quotes']['USD']['percent_change_24h'] ?? '0';
+
     } catch (\Exception $e) {
         $btcPrice = 'N/A';
         $btcChange = '0';

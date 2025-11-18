@@ -26,8 +26,8 @@
                         $color = $isUp ? 'text-green-600' : 'text-red-600';
                     @endphp
                     <span class="{{ $color }} font-medium">
-                        BTC/USDT {{ number_format($btcPrice, 2) }}
-                        ({{ $isUp ? '+' : '' }}{{ $btcChange }}%) {{ $arrow }}
+                        BTC/USDT {{ number_format((float) $btcPrice, 2) }}
+                        ({{ $isUp ? '+' : '' }}{{ number_format((float) $btcChange, 4) }}%) {{ $arrow }}
                     </span><br>
                 @else
                     <span class="text-gray-500">Gagal memuat data saham</span><br>
