@@ -55,9 +55,14 @@
                     <h2 class="text-lg font-serif font-semibold text-gray-800 mb-1">
                         {{ $article->title }}
                     </h2>
+
+                    <!-- FIX: HANDLE NULL CATEGORY & NULL USER -->
                     <p class="text-sm text-gray-500 mb-1">
-                        {{ $article->category->name }} • {{ $article->user->name }}
+                        {{ $article->category->name ?? 'Tidak ada kategori' }} 
+                        • 
+                        {{ $article->user->name ?? 'User tidak ditemukan' }}
                     </p>
+
                     <p class="text-xs text-gray-400 mb-3">
                         Dipublikasikan pada {{ $article->created_at->translatedFormat('d F Y') }}
                     </p>
@@ -81,8 +86,7 @@
                                     </a>
 
                                     <form action="{{ route('articles.destroy', $article->id) }}" method="POST"
-                                          onsubmit="return confirm('Yakin hapus artikel ini?')"
-                                          class="m-0">
+                                          onsubmit="return confirm('Yakin hapus artikel ini?')" class="m-0">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="text-red-600 hover:underline text-sm font-medium">

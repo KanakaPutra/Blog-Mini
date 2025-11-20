@@ -19,19 +19,29 @@
 
             <!-- Kanan: info saham -->
             <div class="text-sm leading-tight text-right font-serif">
-                @if(!empty($btcPrice) && $btcPrice !== 'N/A')
+
+                @php
+                    $validPrice = is_numeric($btcPrice ?? null);
+                    $validChange = is_numeric($btcChange ?? null);
+                @endphp
+
+                @if($validPrice && $validChange)
                     @php
                         $isUp = floatval($btcChange) > 0;
                         $arrow = $isUp ? '↑' : '↓';
                         $color = $isUp ? 'text-green-600' : 'text-red-600';
                     @endphp
+
                     <span class="{{ $color }} font-medium">
                         BTC/USDT {{ number_format((float) $btcPrice, 2) }}
                         ({{ $isUp ? '+' : '' }}{{ number_format((float) $btcChange, 4) }}%) {{ $arrow }}
-                    </span><br>
+                    </span>
+
                 @else
-                    <span class="text-gray-500">Gagal memuat data saham</span><br>
+                    <span class="text-gray-500">Gagal memuat data saham</span>
                 @endif
+
+                <br>
                 <span class="text-gray-600">
                     {{ \Carbon\Carbon::now('Asia/Jakarta')->format('H:i') }} WIB
                 </span>
@@ -59,8 +69,10 @@
                             {{ $article->title }}
                         </h2>
 
+                        <!-- FIX category & user null -->
                         <p class="text-sm text-gray-500 mb-2">
-                            {{ $article->category->name }} • {{ $article->user->name }}
+                            {{ $article->category->name ?? 'Tidak ada kategori' }} •
+                            {{ $article->user->name ?? 'User tidak ditemukan' }}
                         </p>
 
                         <p class="text-xs text-gray-400 mb-3">
