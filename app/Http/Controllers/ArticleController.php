@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Article;
 use App\Models\Category;
+use App\Models\ArticleLike;
+use App\Models\ArticleReport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -61,7 +63,7 @@ class ArticleController extends Controller
         $request->validate([
             'title' => 'required',
             'content' => 'required',
-            'category_id' => 'nullable|exists:categories,id', // <= diperbaiki
+            'category_id' => 'nullable|exists:categories,id',
             'thumbnail' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
@@ -99,7 +101,7 @@ class ArticleController extends Controller
             $request->validate([
                 'title' => 'required',
                 'content' => 'required',
-                'category_id' => 'nullable|exists:categories,id', // <= diperbaiki
+                'category_id' => 'nullable|exists:categories,id',
                 'thumbnail' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             ]);
 
@@ -133,5 +135,77 @@ class ArticleController extends Controller
     {
         $article->load(['category', 'user', 'comments.user']);
         return view('articles.show', compact('article'));
+    }
+
+    // ============================================================
+    //                          LIKE
+    // ============================================================
+
+    public function like($id)
+    {
+        $article = Article::findOrFail($id);
+        $userId = Auth::id();
+
+        $existing = $article->likes()->where('user_id', $userId)->first();
+
+        if ($existing) {
+            if ($existing->type === 'like') {
+                $existing->delete(); // batal like
+            } else {
+                $existing->update(['type' => 'like']); // ubah dislike → like
+            }
+        } else {
+            $article->likes()->create([
+                'user_id' => $userId,
+                'type'    => 'like',
+            ]);
+        }
+
+        return back();
+    }
+
+    // ============================================================
+    //                         DISLIKE
+    // ============================================================
+
+    public function dislike($id)
+    {
+        $article = Article::findOrFail($id);
+        $userId = Auth::id();
+
+        $existing = $article->likes()->where('user_id', $userId)->first();
+
+        if ($existing) {
+            if ($existing->type === 'dislike') {
+                $existing->delete(); // batal dislike
+            } else {
+                $existing->update(['type' => 'dislike']); // ubah like → dislike
+            }
+        } else {
+            $article->likes()->create([
+                'user_id' => $userId,
+                'type'    => 'dislike',
+            ]);
+        }
+
+        return back();
+    }
+
+
+    // ============================================================
+    //                         REPORT
+    // ============================================================
+
+    public function report($id, Request $request)
+    {
+        $article = Article::findOrFail($id);
+
+        ArticleReport::create([
+            'article_id' => $article->id,
+            'user_id'    => Auth::id(),
+            'reason'     => $request->reason ?? 'No reason provided',
+        ]);
+
+        return back()->with('success', 'Laporan terkirim!');
     }
 }

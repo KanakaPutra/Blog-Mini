@@ -12,11 +12,9 @@ use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
-| Web Routes
+| PUBLIC PAGE (WELCOME + HOME)
 |--------------------------------------------------------------------------
 */
-
-// 🔹 Halaman utama (publik)
 Route::get('/', function () {
     $articles = Article::with(['category', 'user'])->latest()->get();
 
@@ -33,27 +31,40 @@ Route::get('/', function () {
     return view('welcome', compact('articles', 'btcPrice', 'btcChange'));
 })->name('home');
 
-// 🔹 Alias ke home
 Route::get('/welcome', fn () => redirect()->route('home'))->name('welcome');
 
 
-// ======================================================
-// 🔹 Category (khusus superadmin)
-// ======================================================
+/*
+|--------------------------------------------------------------------------
+| CATEGORY PUBLIC (UNTUK NAVBAR)
+|--------------------------------------------------------------------------
+*/
+Route::get('/category/{id}', [CategoryController::class, 'show'])->name('category.show');
+
+
+/*
+|--------------------------------------------------------------------------
+| CATEGORY MANAGEMENT (SUPER ADMIN ONLY)
+|--------------------------------------------------------------------------
+*/
 Route::middleware(['auth', 'superadmin'])->group(function () {
-    Route::resource('categories', CategoryController::class);
+    Route::resource('categories', CategoryController::class)->except('show');
 });
 
 
-// ======================================================
-// 🔹 Artikel publik + filter "Artikel Saya"
-// ======================================================
+/*
+|--------------------------------------------------------------------------
+| ARTICLES PUBLIC PAGE
+|--------------------------------------------------------------------------
+*/
 Route::get('/articles', [ArticleController::class, 'index'])->name('articles.index');
 
 
-// ======================================================
-// 🔹 CRUD Artikel (khusus admin & superadmin)
-// ======================================================
+/*
+|--------------------------------------------------------------------------
+| ARTICLES CRUD (ADMIN & SUPERADMIN)
+|--------------------------------------------------------------------------
+*/
 Route::middleware(['auth', 'admin'])->group(function () {
     Route::get('/articles/create', [ArticleController::class, 'create'])->name('articles.create');
     Route::post('/articles', [ArticleController::class, 'store'])->name('articles.store');
@@ -62,18 +73,19 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::delete('/articles/{article}', [ArticleController::class, 'destroy'])->name('articles.destroy');
 });
 
-// 🔹 Artikel tunggal
+// Single article
 Route::get('/articles/{article}', [ArticleController::class, 'show'])
     ->whereNumber('article')
     ->name('articles.show');
 
 
-// ======================================================
-// 🔹 DASHBOARD — custom redirect jika belum login
-// ======================================================
+/*
+|--------------------------------------------------------------------------
+| DASHBOARD (LOGIN REQUIRED)
+|--------------------------------------------------------------------------
+*/
 Route::get('/dashboard', function () {
 
-    // Jika belum login → ke welcome
     if (!Auth::check()) {
         return redirect()->route('welcome');
     }
@@ -94,9 +106,11 @@ Route::get('/dashboard', function () {
 })->name('dashboard');
 
 
-// ======================================================
-// 🔹 Komentar & Profil
-// ======================================================
+/*
+|--------------------------------------------------------------------------
+| COMMENTS + PROFILE
+|--------------------------------------------------------------------------
+*/
 Route::middleware(['auth'])->group(function () {
     Route::post('/comments', [CommentController::class, 'store'])->name('comments.store');
 
@@ -106,13 +120,23 @@ Route::middleware(['auth'])->group(function () {
 });
 
 
-// 🔹 Route kategori (navbar publik)
-Route::get('/category/{id}', [CategoryController::class, 'show'])->name('category.show');
+/*
+|--------------------------------------------------------------------------
+| ARTICLE LIKE / DISLIKE / REPORT (DITAMBAHKAN)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth'])->group(function () {
+    Route::post('/articles/{id}/like', [ArticleController::class, 'like'])->name('articles.like');
+    Route::post('/articles/{id}/dislike', [ArticleController::class, 'dislike'])->name('articles.dislike');
+    Route::post('/articles/{id}/report', [ArticleController::class, 'report'])->name('articles.report');
+});
 
 
-// ======================================================
-// 🔹 SUPER ADMIN AREA
-// ======================================================
+/*
+|--------------------------------------------------------------------------
+| SUPER ADMIN PANEL
+|--------------------------------------------------------------------------
+*/
 Route::middleware(['auth', 'superadmin'])
     ->prefix('superadmin')
     ->name('superadmin.')
@@ -120,19 +144,14 @@ Route::middleware(['auth', 'superadmin'])
         Route::get('/users', [SuperAdminController::class, 'users'])->name('users');
         Route::get('/settings', [SuperAdminController::class, 'settings'])->name('settings');
 
-        // Ban / unban user
         Route::patch('/users/{user}/ban', [SuperAdminController::class, 'ban'])->name('users.ban');
         Route::patch('/users/{user}/unban', [SuperAdminController::class, 'unban'])->name('users.unban');
     });
 
 
-// ======================================================
-// 🔹 Dummy routes untuk CI test
-// ======================================================
-Route::post('/login', fn () => redirect()->route('dashboard'))->name('login.store');
-
-Route::get('/user/password/edit', fn () => view('auth.passwords.edit'))->name('user-password.edit');
-
-Route::get('/two-factor', fn () => view('auth.two-factor'))->name('two-factor.show');
-
+/*
+|--------------------------------------------------------------------------
+| AUTH ROUTES
+|--------------------------------------------------------------------------
+*/
 require __DIR__.'/auth.php';

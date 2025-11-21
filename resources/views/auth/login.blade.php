@@ -37,7 +37,7 @@
                               type="password"
                               name="password"
                               required autocomplete="current-password"
-                              placeholder="••••••••" />
+                              placeholder="Password" />
                 <button type="button" id="togglePassword" class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer text-gray-400 hover:text-gray-600 focus:outline-none transition duration-150">
                     <!-- Icon Eye -->
                     <svg id="icon-eye" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
