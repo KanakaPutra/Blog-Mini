@@ -112,6 +112,8 @@ Route::get('/dashboard', function () {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth'])->group(function () {
+
+    // support komentar + reply (parent_id)
     Route::post('/comments', [CommentController::class, 'store'])->name('comments.store');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -122,7 +124,7 @@ Route::middleware(['auth'])->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| ARTICLE LIKE / DISLIKE / REPORT (DITAMBAHKAN)
+| ARTICLE LIKE / DISLIKE / REPORT
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth'])->group(function () {
@@ -141,6 +143,7 @@ Route::middleware(['auth', 'superadmin'])
     ->prefix('superadmin')
     ->name('superadmin.')
     ->group(function () {
+
         Route::get('/users', [SuperAdminController::class, 'users'])->name('users');
         Route::get('/settings', [SuperAdminController::class, 'settings'])->name('settings');
 

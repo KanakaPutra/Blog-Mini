@@ -3,7 +3,8 @@
 
         {{-- Thumbnail --}}
         @if($article->thumbnail)
-            <img src="{{ asset('storage/' . $article->thumbnail) }}" class="w-full h-64 object-cover rounded mb-6 shadow">
+            <img src="{{ asset('storage/' . $article->thumbnail) }}" 
+                 class="w-full h-64 object-cover rounded mb-6 shadow">
         @endif
 
         {{-- Judul --}}
@@ -23,12 +24,12 @@
             {!! nl2br(e($article->content)) !!}
         </div>
 
-        {{-- Action Buttons & Back Link --}}
+        {{-- Tombol kembali + like/dislike/report --}}
         <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-10">
 
             {{-- Tombol Kembali --}}
             <a href="{{ route('dashboard') }}"
-                class="text-gray-500 hover:text-gray-700 font-medium transition flex items-center gap-2 order-2 md:order-1">
+               class="text-gray-500 hover:text-gray-700 font-medium transition flex items-center gap-2 order-2 md:order-1">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path fill-rule="evenodd"
                         d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z"
@@ -37,10 +38,10 @@
                 Kembali ke Beranda
             </a>
 
+            {{-- Like, Dislike, Report --}}
             <div class="flex items-center gap-2 order-1 md:order-2">
 
                 @auth
-
                     {{-- LIKE --}}
                     <form action="{{ route('articles.like', $article->id) }}" method="POST">
                         @csrf
@@ -49,14 +50,12 @@
                             {{ $article->isLikedBy(auth()->user()) 
                                 ? 'bg-red-500 text-white border-red-600' 
                                 : 'bg-gray-100 text-gray-600 border-gray-300 hover:bg-red-50 hover:text-red-600' }}">
-
                             <svg xmlns="http://www.w3.org/2000/svg"
                                 class="h-5 w-5 {{ $article->isLikedBy(auth()->user()) ? 'fill-current' : 'stroke-current fill-none' }}"
                                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                             </svg>
-
                             <span class="font-semibold">{{ $article->totalLikes() }}</span>
                         </button>
                     </form>
@@ -69,7 +68,6 @@
                             {{ $article->isDislikedBy(auth()->user())
                                 ? 'bg-red-500 text-white border-red-600'
                                 : 'text-gray-500 border-gray-300 hover:text-red-600 hover:bg-red-50' }}">
-
                             <svg xmlns="http://www.w3.org/2000/svg"
                                 class="h-6 w-6 {{ $article->isDislikedBy(auth()->user()) ? 'stroke-white' : '' }}"
                                 fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -87,7 +85,6 @@
                             {{ $article->isReportedBy(auth()->user())
                                 ? 'bg-yellow-400 text-black border-yellow-500'
                                 : 'text-gray-500 border-gray-300 hover:text-yellow-600 hover:bg-yellow-50' }}">
-
                             <svg xmlns="http://www.w3.org/2000/svg"
                                 class="h-6 w-6 {{ $article->isReportedBy(auth()->user()) ? 'stroke-black' : '' }}"
                                 fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -99,60 +96,85 @@
 
                 @else
                     <div class="text-sm text-gray-500">
-                        <a href="{{ route('login') }}" class="text-blue-600 hover:underline font-semibold">Login</a> untuk
-                        berinteraksi
+                        <a href="{{ route('login') }}" class="text-blue-600 hover:underline font-semibold">
+                            Login
+                        </a> untuk berinteraksi
                     </div>
                 @endauth
             </div>
-
         </div>
 
         <hr class="my-8 border-gray-300">
 
-        {{-- ========================= --}}
-        {{-- === Form Komentar === --}}
-        {{-- ========================= --}}
-        <h2 class="text-xl font-semibold mb-4">Tulis Komentar</h2>
+        <div x-data="{
+            commentContent: '',
+            isSubmitting: false,
+            submitComment() {
+                this.isSubmitting = true;
+                const formData = new FormData(this.$refs.mainForm);
+                
+                fetch('{{ route('comments.store') }}', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.html) {
+                        this.$refs.commentsList.insertAdjacentHTML('afterbegin', data.html);
+                        this.commentContent = '';
+                        if (this.$refs.noCommentsMsg) {
+                            this.$refs.noCommentsMsg.style.display = 'none';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Failed to post comment. Please try again.');
+                })
+                .finally(() => {
+                    this.isSubmitting = false;
+                });
+            }
+        }">
+            {{-- Form komentar --}}
+            <h2 class="text-xl font-semibold mb-4">Tulis Komentar</h2>
 
-        @auth
-            <form action="{{ route('comments.store') }}" method="POST" class="mb-8 space-y-3">
-                @csrf
-                <input type="hidden" name="article_id" value="{{ $article->id }}">
+            @auth
+                <form x-ref="mainForm" @submit.prevent="submitComment" class="mb-8 space-y-3">
+                    <input type="hidden" name="article_id" value="{{ $article->id }}">
 
-                <textarea name="content" rows="3" class="w-full border rounded p-2 focus:ring focus:ring-blue-200"
-                    placeholder="Tulis komentar kamu..." required></textarea>
+                    <textarea name="content" x-model="commentContent" rows="3"
+                        class="w-full border rounded p-2 focus:ring focus:ring-blue-200"
+                        placeholder="Tulis komentar kamu..." required></textarea>
 
-                <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">
-                    Kirim
-                </button>
-            </form>
-        @else
-            <p class="mb-8 text-gray-500">
-                <a href="{{ route('login') }}" class="text-blue-600 hover:underline">
-                    Login
-                </a>
-                untuk menulis komentar.
-            </p>
-        @endauth
-
-        {{-- ========================= --}}
-        {{-- === Daftar Komentar === --}}
-        {{-- ========================= --}}
-        <h2 class="text-xl font-semibold mb-4">Komentar Lainnya</h2>
-
-        @forelse($article->comments->sortByDesc('created_at') as $comment)
-            <div class="border rounded p-3 mb-3 bg-gray-50 shadow-sm">
-                <p class="text-sm text-gray-600 mb-1">
-                    <strong>{{ $comment->user->name ?? 'User hilang' }}</strong>
-                    <span class="text-gray-400">· {{ $comment->created_at->diffForHumans() }}</span>
+                    <button :disabled="isSubmitting" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition flex items-center gap-2">
+                        <span x-show="!isSubmitting">Kirim</span>
+                        <span x-show="isSubmitting">Sending...</span>
+                    </button>
+                </form>
+            @else
+                <p class="mb-8 text-gray-500">
+                    <a href="{{ route('login') }}" class="text-blue-600 hover:underline">Login</a>
+                    untuk menulis komentar.
                 </p>
-                <p class="text-gray-700">
-                    {{ $comment->content }}
-                </p>
+            @endauth
+
+            {{-- Daftar Komentar --}}
+            <h2 class="text-xl font-semibold mb-4">Komentar Lainnya</h2>
+
+            <div x-ref="commentsList">
+                @forelse($article->comments->where('parent_id', null) as $comment)
+                    @include('components.comment', ['comment' => $comment])
+                @empty
+                    <p x-ref="noCommentsMsg" class="text-gray-500">Belum ada komentar.</p>
+                @endforelse
             </div>
-        @empty
-            <p class="text-gray-500">Belum ada komentar.</p>
-        @endforelse
+        </div>
 
     </div>
 </x-app-layout>

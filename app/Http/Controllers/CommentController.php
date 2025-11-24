@@ -13,14 +13,45 @@ class CommentController extends Controller
         $request->validate([
             'article_id' => 'required|exists:articles,id',
             'content' => 'required|string|max:1000',
+            'parent_id' => 'nullable|exists:comments,id', // untuk reply
+            'depth' => 'nullable|integer', // terima depth dari frontend
         ]);
 
-        Comment::create([
+        $comment = Comment::create([
             'user_id' => Auth::id(),
             'article_id' => $request->article_id,
             'content' => $request->input('content'),
+            'parent_id' => $request->parent_id, // simpan parent
         ]);
 
-        return back()->with('success', 'Komentar berhasil dikirim.');
+        if ($request->wantsJson()) {
+            // Load relationships needed for the view
+            $comment->load('user', 'replies');
+
+            // Determine depth and parent author for the view
+            // Depth yang dikirim adalah depth parent, jadi depth comment baru adalah parent + 1
+            // Jika tidak ada parent, depth = 0
+            $depth = $request->input('depth', 0) + 1;
+            $parentAuthor = $comment->parent ? $comment->parent->user->name : null;
+
+            // Render the component
+            $html = view('components.comment', [
+                'comment' => $comment,
+                'depth' => $depth,
+                'parentAuthor' => $parentAuthor
+            ])->render();
+
+            return response()->json([
+                'html' => $html,
+                'message' => 'Comment posted successfully'
+            ]);
+        }
+
+        return back()->with(
+            'success',
+            $request->parent_id
+            ? 'Balasan berhasil dikirim.'
+            : 'Komentar berhasil dikirim.'
+        );
     }
 }
