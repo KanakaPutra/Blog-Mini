@@ -31,7 +31,7 @@ Route::get('/', function () {
     return view('welcome', compact('articles', 'btcPrice', 'btcChange'));
 })->name('home');
 
-Route::get('/welcome', fn () => redirect()->route('home'))->name('welcome');
+Route::get('/welcome', fn() => redirect()->route('home'))->name('welcome');
 
 
 /*
@@ -115,6 +115,8 @@ Route::middleware(['auth'])->group(function () {
 
     // support komentar + reply (parent_id)
     Route::post('/comments', [CommentController::class, 'store'])->name('comments.store');
+    Route::put('/comments/{comment}', [CommentController::class, 'update'])->name('comments.update');
+    Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -157,4 +159,4 @@ Route::middleware(['auth', 'superadmin'])
 | AUTH ROUTES
 |--------------------------------------------------------------------------
 */
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

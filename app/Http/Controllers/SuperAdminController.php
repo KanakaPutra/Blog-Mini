@@ -22,6 +22,15 @@ class SuperAdminController extends Controller
             $query->where('is_admin', $request->role);
         }
 
+        // Filter berdasarkan pencarian (Nama atau Email)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
         // Urutkan user: Super Admin > Admin > User, lalu berdasarkan waktu pembuatan terbaru
         $users = $query->orderByDesc('is_admin')->latest()->paginate(7);
 
@@ -63,7 +72,7 @@ class SuperAdminController extends Controller
      */
     public function ban(User $user)
     {
-        if (! Auth::check()) {
+        if (!Auth::check()) {
             return back()->with('error', 'Anda harus login terlebih dahulu.');
         }
 
@@ -85,7 +94,7 @@ class SuperAdminController extends Controller
      */
     public function unban(User $user)
     {
-        if (! Auth::check()) {
+        if (!Auth::check()) {
             return back()->with('error', 'Anda harus login terlebih dahulu.');
         }
 

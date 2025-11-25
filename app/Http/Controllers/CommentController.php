@@ -54,4 +54,37 @@ class CommentController extends Controller
             : 'Komentar berhasil dikirim.'
         );
     }
+
+    public function update(Request $request, Comment $comment)
+    {
+        if (Auth::id() !== $comment->user_id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $request->validate([
+            'content' => 'required|string|max:1000',
+        ]);
+
+        $comment->update([
+            'content' => $request->input('content'),
+        ]);
+
+        return response()->json([
+            'message' => 'Comment updated successfully',
+            'comment' => $comment
+        ]);
+    }
+
+    public function destroy(Comment $comment)
+    {
+        if (Auth::id() !== $comment->user_id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $comment->delete();
+
+        return response()->json([
+            'message' => 'Comment deleted successfully'
+        ]);
+    }
 }
