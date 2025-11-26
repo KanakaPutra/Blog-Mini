@@ -78,9 +78,8 @@
                     </form>
 
                     {{-- REPORT --}}
-                    <form action="{{ route('articles.report', $article->id) }}" method="POST">
-                        @csrf
-                        <button
+                    <div x-data="{ openReportModal: false, reason: '', details: '' }">
+                        <button @click="openReportModal = true"
                             class="group p-2 rounded-full transition border
                             {{ $article->isReportedBy(auth()->user())
                                 ? 'bg-yellow-400 text-black border-yellow-500'
@@ -92,7 +91,58 @@
                                     d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                             </svg>
                         </button>
-                    </form>
+
+                        {{-- Modal --}}
+                        <div x-show="openReportModal" style="display: none;"
+                            class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 px-4"
+                            x-transition:enter="transition ease-out duration-300"
+                            x-transition:enter-start="opacity-0"
+                            x-transition:enter-end="opacity-100"
+                            x-transition:leave="transition ease-in duration-200"
+                            x-transition:leave-start="opacity-100"
+                            x-transition:leave-end="opacity-0">
+                            
+                            <div class="bg-white rounded-lg shadow-xl w-full max-w-md p-6"
+                                @click.away="openReportModal = false">
+                                <h3 class="text-lg font-bold mb-4">Laporkan Artikel</h3>
+                                
+                                <form action="{{ route('articles.report', $article->id) }}" method="POST">
+                                    @csrf
+                                    
+                                    <div class="space-y-3 mb-4">
+                                        <label class="flex items-center gap-2 cursor-pointer">
+                                            <input type="radio" name="reason" value="Hoax" x-model="reason" required>
+                                            <span>Berita Hoax</span>
+                                        </label>
+                                        <label class="flex items-center gap-2 cursor-pointer">
+                                            <input type="radio" name="reason" value="Menebar Kebencian" x-model="reason">
+                                            <span>Menebar Kebencian</span>
+                                        </label>
+                                        <label class="flex items-center gap-2 cursor-pointer">
+                                            <input type="radio" name="reason" value="Sumber Gak Jelas" x-model="reason">
+                                            <span>Sumber Gak Jelas</span>
+                                        </label>
+                                        <label class="flex items-center gap-2 cursor-pointer">
+                                            <input type="radio" name="reason" value="Lainnya" x-model="reason">
+                                            <span>Lainnya</span>
+                                        </label>
+                                    </div>
+
+                                    <div x-show="reason === 'Lainnya'" class="mb-4">
+                                        <textarea name="details" rows="3" class="w-full border rounded p-2" 
+                                            placeholder="Jelaskan keluhan Anda..." :required="reason === 'Lainnya'"></textarea>
+                                    </div>
+
+                                    <div class="flex justify-end gap-2">
+                                        <button type="button" @click="openReportModal = false"
+                                            class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded">Batal</button>
+                                        <button type="submit"
+                                            class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">Kirim Laporan</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
 
                 @else
                     <div class="text-sm text-gray-500">

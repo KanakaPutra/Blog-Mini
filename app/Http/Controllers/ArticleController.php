@@ -157,7 +157,7 @@ class ArticleController extends Controller
         } else {
             $article->likes()->create([
                 'user_id' => $userId,
-                'type'    => 'like',
+                'type' => 'like',
             ]);
         }
 
@@ -184,7 +184,7 @@ class ArticleController extends Controller
         } else {
             $article->likes()->create([
                 'user_id' => $userId,
-                'type'    => 'dislike',
+                'type' => 'dislike',
             ]);
         }
 
@@ -200,10 +200,16 @@ class ArticleController extends Controller
     {
         $article = Article::findOrFail($id);
 
+        $request->validate([
+            'reason' => 'required|string',
+            'details' => 'nullable|string',
+        ]);
+
         ArticleReport::create([
             'article_id' => $article->id,
-            'user_id'    => Auth::id(),
-            'reason'     => $request->reason ?? 'No reason provided',
+            'user_id' => Auth::id(),
+            'reason' => $request->reason,
+            'details' => $request->details,
         ]);
 
         return back()->with('success', 'Laporan terkirim!');
