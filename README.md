@@ -1,6 +1,6 @@
 <div align="center">
 
-# 📝 Blog-Mini
+# Blog-Mini
 
 ### Modern Blog Platform with Laravel & Livewire
 
