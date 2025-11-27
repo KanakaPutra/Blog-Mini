@@ -152,7 +152,7 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        @foreach ($categories as $category)
+                        @foreach ($paginatedCategories as $category)
                             <tr class="hover:bg-gray-50 transition-colors duration-150">
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     #{{ $category->id }}
@@ -197,12 +197,18 @@
                     </tbody>
                 </table>
             </div>
-            @if($categories->isEmpty())
+            <div class="px-6 py-4 border-t border-gray-100">
+                {{ $paginatedCategories->links() }}
+            </div>
+            @if($paginatedCategories->isEmpty())
                 <div class="p-6 text-center text-gray-500">
                     No categories found. Start by adding one above.
                 </div>
             @endif
         </div>
+
+        <!-- Admin Report Section -->
+        <x-admin-report :reports="$reports" />
 
     </div>
 

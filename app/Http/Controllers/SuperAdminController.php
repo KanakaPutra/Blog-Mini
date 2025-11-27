@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Category;
 use App\Models\Article;
+use App\Models\ArticleReport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -43,7 +44,7 @@ class SuperAdminController extends Controller
     public function settings()
     {
         // Semua kategori untuk CRUD kategori
-        $categories = Category::all();
+        $paginatedCategories = Category::paginate(5);
 
         // Statistik user
         $userCount = User::count();
@@ -57,13 +58,17 @@ class SuperAdminController extends Controller
             ->groupBy('user_id')
             ->pluck('total', 'user_id');
 
+        // Ambil laporan artikel
+        $reports = ArticleReport::with(['article', 'user'])->latest()->get();
+
         return view('superadmin.settings', compact(
-            'categories',
+            'paginatedCategories',
             'userCount',
             'superAdminCount',
             'adminCount',
             'normalUserCount',
-            'articlePerUser'
+            'articlePerUser',
+            'reports'
         ));
     }
 
