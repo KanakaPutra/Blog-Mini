@@ -23,20 +23,18 @@
                 <div class="mb-8 flex items-center gap-3">
 
                     <!-- ALL ARTIKEL -->
-                    <a href="{{ route('articles.index') }}"
-                        class="px-4 py-2 rounded-md text-sm font-medium
-                        {{ request('filter') == 'mine'
-                            ? 'bg-gray-200 text-gray-700'
-                            : 'bg-blue-600 text-white hover:bg-blue-700' }}">
+                    <a href="{{ route('articles.index') }}" class="px-4 py-2 rounded-md text-sm font-medium
+                                {{ request('filter') == 'mine'
+                    ? 'bg-gray-200 text-gray-700'
+                    : 'bg-blue-600 text-white hover:bg-blue-700' }}">
                         Semua Artikel
                     </a>
 
                     <!-- ARTIKEL SAYA -->
-                    <a href="{{ route('articles.index', ['filter' => 'mine']) }}"
-                        class="px-4 py-2 rounded-md text-sm font-medium
-                        {{ request('filter') == 'mine'
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+                    <a href="{{ route('articles.index', ['filter' => 'mine']) }}" class="px-4 py-2 rounded-md text-sm font-medium
+                                {{ request('filter') == 'mine'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
                         Artikel Saya
                     </a>
 
@@ -48,12 +46,43 @@
         <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 
             @foreach($articles as $article)
-                <div class="border border-gray-200 rounded-lg bg-white shadow-sm hover:shadow-md transition duration-150 flex flex-col">
+                <div
+                    class="border border-gray-200 rounded-lg bg-white shadow-sm hover:shadow-md transition duration-150 flex flex-col">
 
                     @if($article->thumbnail)
-                        <img src="{{ asset('storage/'.$article->thumbnail) }}"
-                            class="w-full h-48 object-cover rounded-t-lg"
-                            alt="{{ $article->title }}">
+                        <div class="relative">
+                            <img src="{{ asset('storage/' . $article->thumbnail) }}"
+                                class="w-full h-48 object-cover rounded-t-lg {{ $article->suspended ? 'opacity-50' : '' }}"
+                                alt="{{ $article->title }}">
+
+                            @if($article->suspended)
+                                <div class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-t-lg">
+                                    <span
+                                        class="bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">
+                                        Ditangguhkan
+                                    </span>
+                                </div>
+                            @endif
+                        </div>
+                    @endif
+
+                    @if($article->suspended)
+                        <div class="bg-red-50 border-l-4 border-red-500 p-3 mx-4 mt-4">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd"
+                                            d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-xs text-red-700">
+                                        Artikel ini melanggar aturan dan sedang ditangguhkan.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
                     @endif
 
                     <div class="p-4 flex flex-col flex-grow">
@@ -93,14 +122,11 @@
                                             Edit
                                         </a>
 
-                                        <form action="{{ route('articles.destroy', $article->id) }}"
-                                              method="POST"
-                                              onsubmit="return confirm('Yakin hapus artikel ini?')"
-                                              class="m-0">
+                                        <form action="{{ route('articles.destroy', $article->id) }}" method="POST"
+                                            onsubmit="return confirm('Yakin hapus artikel ini?')" class="m-0">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit"
-                                                class="text-red-600 hover:underline text-sm font-medium">
+                                            <button type="submit" class="text-red-600 hover:underline text-sm font-medium">
                                                 Hapus
                                             </button>
                                         </form>

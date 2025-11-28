@@ -111,4 +111,21 @@ class SuperAdminController extends Controller
 
         return back()->with('success', "{$user->name} berhasil diunban.");
     }
+    /**
+     * 🔹 Suspend article
+     */
+    public function suspend(Article $article)
+    {
+        $article->update(['suspended' => true]);
+        return back()->with('success', 'Artikel berhasil ditangguhkan.');
+    }
+
+    /**
+     * 🔹 Unsuspend article
+     */
+    public function unsuspend(Article $article)
+    {
+        $article->update(['suspended' => false]);
+        return back()->with('success', 'Artikel berhasil dipulihkan.');
+    }
 }

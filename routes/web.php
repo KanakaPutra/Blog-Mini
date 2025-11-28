@@ -16,7 +16,10 @@ use Illuminate\Support\Facades\Auth;
 |--------------------------------------------------------------------------
 */
 Route::get('/', function () {
-    $articles = Article::with(['category', 'user'])->latest()->get();
+    $articles = Article::with(['category', 'user'])
+        ->where('suspended', false)
+        ->latest()
+        ->get();
 
     try {
         $response = Http::get('https://api.alternative.me/v2/ticker/1/');
@@ -90,7 +93,10 @@ Route::get('/dashboard', function () {
         return redirect()->route('welcome');
     }
 
-    $articles = Article::with(['category', 'user', 'comments'])->latest()->get();
+    $articles = Article::with(['category', 'user', 'comments'])
+        ->where('suspended', false)
+        ->latest()
+        ->get();
 
     try {
         $response = Http::get('https://api.alternative.me/v2/ticker/1/');
@@ -151,6 +157,9 @@ Route::middleware(['auth', 'superadmin'])
 
         Route::patch('/users/{user}/ban', [SuperAdminController::class, 'ban'])->name('users.ban');
         Route::patch('/users/{user}/unban', [SuperAdminController::class, 'unban'])->name('users.unban');
+
+        Route::patch('/articles/{article}/suspend', [SuperAdminController::class, 'suspend'])->name('articles.suspend');
+        Route::patch('/articles/{article}/unsuspend', [SuperAdminController::class, 'unsuspend'])->name('articles.unsuspend');
     });
 
 

@@ -23,7 +23,15 @@ class ArticleController extends Controller
                     ->latest()
                     ->get();
             } else {
-                $articles = Article::with(['category', 'user'])->latest()->get();
+                // Super admin sees all articles EXCEPT suspended ones in the main feed
+                // But if they want to see suspended ones, they should probably go to reports or a specific filter
+                // For now, let's hide suspended articles from the main feed even for super admin, 
+                // unless we want to add a specific filter for them.
+                // Requirement says: "berita bakal hilang dari index... cuma muncul di list artikel nya"
+                $articles = Article::with(['category', 'user'])
+                    ->where('suspended', false)
+                    ->latest()
+                    ->get();
             }
 
             return view('articles.index', compact('articles'));
@@ -40,7 +48,10 @@ class ArticleController extends Controller
         }
 
         // USER biasa
-        $articles = Article::with(['category', 'user'])->latest()->get();
+        $articles = Article::with(['category', 'user'])
+            ->where('suspended', false)
+            ->latest()
+            ->get();
         return view('articles.index', compact('articles'));
     }
 
