@@ -21,17 +21,25 @@ Route::get('/', function () {
         ->latest()
         ->get();
 
+    $tickers = [];
     try {
-        $response = Http::get('https://api.alternative.me/v2/ticker/1/');
+        $response = Http::get('https://api.alternative.me/v2/ticker/?limit=10');
         $data = $response->json();
-        $btcPrice = $data['data']['1']['quotes']['USD']['price'] ?? 'N/A';
-        $btcChange = $data['data']['1']['quotes']['USD']['percent_change_24h'] ?? '0';
+
+        if (isset($data['data'])) {
+            foreach ($data['data'] as $item) {
+                $tickers[] = [
+                    'symbol' => $item['symbol'] . '/USD',
+                    'price' => $item['quotes']['USD']['price'],
+                    'change' => $item['quotes']['USD']['percent_change_24h'],
+                ];
+            }
+        }
     } catch (\Exception $e) {
-        $btcPrice = 'N/A';
-        $btcChange = '0';
+        // Fallback or empty list
     }
 
-    return view('welcome', compact('articles', 'btcPrice', 'btcChange'));
+    return view('welcome', compact('articles', 'tickers'));
 })->name('home');
 
 Route::get('/welcome', fn() => redirect()->route('home'))->name('welcome');
@@ -98,17 +106,25 @@ Route::get('/dashboard', function () {
         ->latest()
         ->get();
 
+    $tickers = [];
     try {
-        $response = Http::get('https://api.alternative.me/v2/ticker/1/');
+        $response = Http::get('https://api.alternative.me/v2/ticker/?limit=10');
         $data = $response->json();
-        $btcPrice = $data['data']['1']['quotes']['USD']['price'] ?? 'N/A';
-        $btcChange = $data['data']['1']['quotes']['USD']['percent_change_24h'] ?? '0';
+
+        if (isset($data['data'])) {
+            foreach ($data['data'] as $item) {
+                $tickers[] = [
+                    'symbol' => $item['symbol'] . '/USD',
+                    'price' => $item['quotes']['USD']['price'],
+                    'change' => $item['quotes']['USD']['percent_change_24h'],
+                ];
+            }
+        }
     } catch (\Exception $e) {
-        $btcPrice = 'N/A';
-        $btcChange = '0';
+        // Fallback or empty list
     }
 
-    return view('dashboard', compact('articles', 'btcPrice', 'btcChange'));
+    return view('dashboard', compact('articles', 'tickers'));
 })->name('dashboard');
 
 
