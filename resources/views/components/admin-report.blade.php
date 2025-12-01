@@ -24,6 +24,9 @@
                     <th scope="col"
                         class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                     <th scope="col"
+                        class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last
+                        Updated</th>
+                    <th scope="col"
                         class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions
                     </th>
                 </tr>
@@ -40,6 +43,7 @@
                             <div class="text-sm text-gray-900">{{ $report->user->name ?? 'Unknown User' }}</div>
                             <div class="text-xs text-gray-500">{{ $report->user->email ?? '' }}</div>
                         </td>
+
                         <td class="px-6 py-4">
                             <div class="text-sm text-gray-900">{{ $report->reason }}</div>
                             <div class="text-xs text-gray-500">{{ \Illuminate\Support\Str::limit($report->details, 50) }}
@@ -47,6 +51,9 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {{ $report->created_at->format('M d, Y') }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {{ $report->article ? $report->article->updated_at->format('M d, Y') : '-' }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             @if($report->article)
@@ -70,6 +77,16 @@
                                             <button type="submit" class="text-red-600 hover:text-red-900">Suspend</button>
                                         </form>
                                     @endif
+
+
+                                    @if (auth()->user()->is_admin == 2)
+                                        <form action="{{ route('articles.destroy', $report->article->id) }}" method="POST"
+                                            onsubmit="return confirm('Hapus artikel ini permanen? Action ini tidak bisa dibatalkan.')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-red-600 hover:text-red-900">Delete</button>
+                                        </form>
+                                    @endif
                                 </div>
                             @else
                                 <span class="text-gray-400">Article Deleted</span>
@@ -78,7 +95,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="5" class="px-6 py-4 text-center text-gray-500">
+                        <td colspan="6" class="px-6 py-4 text-center text-gray-500">
                             No reports found.
                         </td>
                     </tr>

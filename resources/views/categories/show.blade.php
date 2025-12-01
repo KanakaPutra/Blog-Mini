@@ -11,6 +11,7 @@
         <!-- Grid Artikel -->
         <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             @forelse($articles as $article)
+            @if(!$article->suspended)
                 <div class="border border-gray-200 rounded-lg bg-white shadow-sm hover:shadow-md transition duration-150 flex flex-col">
                     
                     @if($article->thumbnail)
@@ -42,6 +43,7 @@
                         </div>
                     </div>
                 </div>
+            @endif
             @empty
                 <p class="text-gray-500 mt-10 font-serif text-center">
                     Belum ada artikel untuk kategori ini.
