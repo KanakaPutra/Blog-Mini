@@ -9,6 +9,9 @@ use App\Models\Category;
 use App\Models\Article;
 use App\Models\Comment;
 
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+
 class AiChat extends Component
 {
     public $isOpen = false;
@@ -16,11 +19,37 @@ class AiChat extends Component
     public $userMessage = '';
     public $isLoading = false;
 
+    // Rate Limiting
+    public $dailyLimit = 20;
+    public $remainingMessages = 0;
+
     public function mount()
     {
         $this->messages = [
             ['role' => 'assistant', 'content' => 'Halo! Saya siap membantu apa pun yang kamu butuhkan.']
         ];
+
+        $this->updateRemainingMessages();
+    }
+
+    public function updateRemainingMessages()
+    {
+        if (Auth::check()) {
+            // Admin & Super Admin unlimited (is_admin > 0)
+            if ((int) Auth::user()->is_admin > 0) {
+                $this->remainingMessages = 9999; // Indikator unlimited
+                return;
+            }
+
+            $userId = Auth::id();
+            $today = now()->format('Y-m-d');
+            $cacheKey = "ai_chat_limit:{$userId}:{$today}";
+
+            $used = Cache::get($cacheKey, 0);
+            $this->remainingMessages = max(0, $this->dailyLimit - $used);
+        } else {
+            $this->remainingMessages = 0;
+        }
     }
 
     public function toggleChat()
@@ -30,6 +59,19 @@ class AiChat extends Component
 
     public function sendMessage()
     {
+        if (!Auth::check()) {
+            $this->messages[] = ['role' => 'assistant', 'content' => 'Maaf, kamu harus login terlebih dahulu untuk menggunakan fitur ini.'];
+            return;
+        }
+
+        // Cek limit hanya untuk user biasa (is_admin = 0)
+        $isAdmin = (int) Auth::user()->is_admin > 0;
+
+        if (!$isAdmin && $this->remainingMessages <= 0) {
+            $this->messages[] = ['role' => 'assistant', 'content' => 'Maaf, kuota harian kamu sudah habis. Silakan kembali lagi besok!'];
+            return;
+        }
+
         if (trim($this->userMessage) === '') {
             return;
         }
@@ -40,11 +82,35 @@ class AiChat extends Component
         $this->userMessage = '';
         $this->isLoading = true;
 
+        // Increment usage only for normal users
+        if (!$isAdmin) {
+            $this->incrementUsage();
+        }
+
         // Call Gemini API
         $response = $this->generateResponse($input);
 
         $this->messages[] = ['role' => 'assistant', 'content' => $response];
         $this->isLoading = false;
+    }
+
+    private function incrementUsage()
+    {
+        if (Auth::check()) {
+            // Double check to prevent admin usage increment
+            if ((int) Auth::user()->is_admin > 0) {
+                return;
+            }
+
+            $userId = Auth::id();
+            $today = now()->format('Y-m-d');
+            $cacheKey = "ai_chat_limit:{$userId}:{$today}";
+
+            $used = Cache::get($cacheKey, 0);
+            Cache::put($cacheKey, $used + 1, now()->endOfDay());
+
+            $this->updateRemainingMessages();
+        }
     }
 
     private function getDatabaseContext()
@@ -143,6 +209,11 @@ instagram: @kaaaiiiyy
 Gunakan informasi blog di atas untuk menjawab pertanyaan yang relevan tentang konten blog.
 Jika ditanya tentang ringkasan artikel tertentu, gunakan informasi ringkasan yang tersedia di atas.
 Jika user meminta ringkasan artikel yang lebih detail, berikan ringkasan berdasarkan snippet konten yang ada.
+
+PENTING - FORMAT JAWABAN:
+Saat menyebutkan beberapa artikel/berita, WAJIB gunakan format markdown numbered list seperti ini:
+1. **Judul Artikel**: Ringkasan singkat...
+2. **Judul Artikel**: Ringkasan singkat...
 
 Pertanyaan pengguna: " . $input
                                     ]

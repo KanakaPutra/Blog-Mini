@@ -79,18 +79,42 @@
 
         <!-- Input -->
         <div class="p-3 bg-white dark:bg-zinc-800 border-t border-zinc-200 dark:border-zinc-700">
-            <form wire:submit.prevent="sendMessage" class="flex gap-2 items-center">
-                <input wire:model="userMessage" type="text" placeholder="Tanya sesuatu..."
-                    class="flex-1 bg-zinc-100 dark:bg-zinc-900 border-0 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 dark:text-white placeholder-zinc-400 transition-shadow">
-                <button type="submit"
-                    class="bg-indigo-600 hover:bg-indigo-700 text-white p-2.5 rounded-xl transition shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none flex-shrink-0"
-                    wire:loading.attr="disabled">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path
-                            d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
-                    </svg>
-                </button>
-            </form>
+            @auth
+                @if(Auth::user()->is_admin || $remainingMessages > 0)
+                    <div class="mb-2 text-xs text-center text-zinc-500 dark:text-zinc-400">
+                        @if(Auth::user()->is_admin)
+                            <span class="font-bold text-indigo-600">Unlimited Access (Admin)</span>
+                        @else
+                            Sisa kuota hari ini: <span class="font-bold text-indigo-600">{{ $remainingMessages }}</span> pesan
+                        @endif
+                    </div>
+                    <form wire:submit.prevent="sendMessage" class="flex gap-2 items-center">
+                        <input wire:model="userMessage" type="text" placeholder="Tanya sesuatu..."
+                            class="flex-1 bg-zinc-100 dark:bg-zinc-900 border-0 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 dark:text-white placeholder-zinc-400 transition-shadow">
+                        <button type="submit"
+                            class="bg-indigo-600 hover:bg-indigo-700 text-white p-2.5 rounded-xl transition shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none flex-shrink-0"
+                            wire:loading.attr="disabled">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path
+                                    d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                            </svg>
+                        </button>
+                    </form>
+                @else
+                    <div class="text-center py-2">
+                        <p class="text-sm text-red-500 font-medium mb-1">Kuota Harian Habis</p>
+                        <p class="text-xs text-zinc-500">Silakan kembali lagi besok!</p>
+                    </div>
+                @endif
+            @else
+                <div class="text-center py-2">
+                    <p class="text-sm text-zinc-600 dark:text-zinc-300 mb-2">Login untuk chat dengan AI</p>
+                    <a href="{{ route('login') }}"
+                        class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium px-4 py-2 rounded-lg transition">
+                        Masuk Sekarang
+                    </a>
+                </div>
+            @endauth
         </div>
     </div>
 
