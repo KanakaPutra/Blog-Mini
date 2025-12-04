@@ -57,6 +57,13 @@ class User extends Authenticatable
         return $this->hasMany(Comment::class);
     }
 
+    public function likedArticles()
+    {
+        return $this->belongsToMany(Article::class, 'article_likes', 'user_id', 'article_id')
+            ->wherePivot('type', '=', 'like')
+            ->withPivot('created_at');
+    }
+
     // ✅ Helper method: cek apakah user dibanned
     public function isBanned(): bool
     {

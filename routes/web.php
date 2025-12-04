@@ -155,6 +155,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/articles/{id}/like', [ArticleController::class, 'like'])->name('articles.like');
     Route::post('/articles/{id}/dislike', [ArticleController::class, 'dislike'])->name('articles.dislike');
     Route::post('/articles/{id}/report', [ArticleController::class, 'report'])->name('articles.report');
+
+    // History Like
+    Route::get('/history-like', [ArticleController::class, 'history'])->name('history.like');
 });
 
 

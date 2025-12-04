@@ -148,6 +148,12 @@ class ArticleController extends Controller
         return view('articles.show', compact('article'));
     }
 
+    public function history()
+    {
+        $articles = Auth::user()->likedArticles()->with(['category', 'user'])->latest('article_likes.created_at')->get();
+        return view('articles.history', compact('articles'));
+    }
+
     // ============================================================
     //                          LIKE
     // ============================================================
