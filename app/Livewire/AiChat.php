@@ -20,7 +20,7 @@ class AiChat extends Component
     public $isLoading = false;
 
     // Rate Limiting
-    public $dailyLimit = 20;
+    public $dailyLimit = 25;
     public $remainingMessages = 0;
 
     public function mount()
