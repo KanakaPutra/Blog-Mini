@@ -148,10 +148,23 @@ class ArticleController extends Controller
         return view('articles.show', compact('article'));
     }
 
-    public function history()
+    public function history(Request $request)
     {
-        $articles = Auth::user()->likedArticles()->with(['category', 'user'])->latest('article_likes.created_at')->get();
-        return view('articles.history', compact('articles'));
+        $type = $request->query('type', 'like');
+        $user = Auth::user();
+
+        if ($type === 'comment') {
+            // Ambil komentar user beserta artikelnya
+            $comments = \App\Models\Comment::where('user_id', $user->id)
+                ->with(['article.category', 'article.user'])
+                ->latest()
+                ->get();
+
+            return view('articles.history', compact('comments', 'type'));
+        } else {
+            $articles = $user->likedArticles()->with(['category', 'user'])->latest('article_likes.created_at')->get();
+            return view('articles.history', compact('articles', 'type'));
+        }
     }
 
     // ============================================================
