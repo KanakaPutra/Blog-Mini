@@ -171,23 +171,37 @@ class ArticleController extends Controller
     //                          LIKE
     // ============================================================
 
-    public function like($id)
+    public function like($id, Request $request)
     {
         $article = Article::findOrFail($id);
         $userId = Auth::id();
 
         $existing = $article->likes()->where('user_id', $userId)->first();
+        $action = '';
 
         if ($existing) {
             if ($existing->type === 'like') {
                 $existing->delete(); // batal like
+                $action = 'unliked';
             } else {
                 $existing->update(['type' => 'like']); // ubah dislike → like
+                $action = 'liked';
             }
         } else {
             $article->likes()->create([
                 'user_id' => $userId,
                 'type' => 'like',
+            ]);
+            $action = 'liked';
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'action' => $action,
+                'total_likes' => $article->totalLikes(),
+                'is_liked' => $article->isLikedBy(Auth::user()),
+                'is_disliked' => $article->isDislikedBy(Auth::user()),
             ]);
         }
 
@@ -198,23 +212,37 @@ class ArticleController extends Controller
     //                         DISLIKE
     // ============================================================
 
-    public function dislike($id)
+    public function dislike($id, Request $request)
     {
         $article = Article::findOrFail($id);
         $userId = Auth::id();
 
         $existing = $article->likes()->where('user_id', $userId)->first();
+        $action = '';
 
         if ($existing) {
             if ($existing->type === 'dislike') {
                 $existing->delete(); // batal dislike
+                $action = 'undisliked';
             } else {
                 $existing->update(['type' => 'dislike']); // ubah like → dislike
+                $action = 'disliked';
             }
         } else {
             $article->likes()->create([
                 'user_id' => $userId,
                 'type' => 'dislike',
+            ]);
+            $action = 'disliked';
+        }
+
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'action' => $action,
+                'total_likes' => $article->totalLikes(),
+                'is_liked' => $article->isLikedBy(Auth::user()),
+                'is_disliked' => $article->isDislikedBy(Auth::user()),
             ]);
         }
 

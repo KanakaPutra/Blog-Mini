@@ -67,40 +67,100 @@
             <div class="flex items-center gap-2 order-1 md:order-2">
 
                 @auth
-                    {{-- LIKE --}}
-                    <form action="{{ route('articles.like', $article->id) }}" method="POST">
-                        @csrf
-                        <button
-                            class="group flex items-center gap-2 px-4 py-2 rounded-full border transition
-                            {{ $article->isLikedBy(auth()->user()) 
+                    <div x-data="{
+                        liked: {{ $article->isLikedBy(auth()->user()) ? 'true' : 'false' }},
+                        disliked: {{ $article->isDislikedBy(auth()->user()) ? 'true' : 'false' }},
+                        likesCount: {{ $article->totalLikes() }},
+                        animating: false,
+                        toggleLike() {
+                            this.animating = true;
+                            fetch('{{ route('articles.like', $article->id) }}', {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                    'Accept': 'application/json'
+                                }
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.success) {
+                                    this.liked = data.is_liked;
+                                    this.disliked = data.is_disliked;
+                                    this.likesCount = data.total_likes;
+                                }
+                                setTimeout(() => this.animating = false, 500);
+                            })
+                            .catch(err => {
+                                console.error(err);
+                                this.animating = false;
+                            });
+                        },
+                        toggleDislike() {
+                            fetch('{{ route('articles.dislike', $article->id) }}', {
+                                method: 'POST',
+                                headers: {
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                    'Accept': 'application/json'
+                                }
+                            })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.success) {
+                                    this.liked = data.is_liked;
+                                    this.disliked = data.is_disliked;
+                                    this.likesCount = data.total_likes;
+                                }
+                            })
+                            .catch(err => console.error(err));
+                        }
+                    }">
+                        <style>
+                            @keyframes like-bounce {
+                                0% { transform: scale(1); }
+                                40% { transform: scale(1.3) rotate(-15deg); }
+                                60% { transform: scale(1.3) rotate(15deg); }
+                                100% { transform: scale(1) rotate(0); }
+                            }
+                            .like-anim {
+                                animation: like-bounce 0.5s ease-in-out;
+                            }
+                        </style>
+
+                        {{-- LIKE --}}
+                        <button @click="toggleLike()"
+                            class="group inline-flex items-center gap-2 px-4 py-2 rounded-full border transition mr-2"
+                            :class="liked 
                                 ? 'bg-red-500 text-white border-red-600' 
-                                : 'bg-gray-100 text-gray-600 border-gray-300 hover:bg-red-50 hover:text-red-600' }}">
+                                : 'bg-gray-100 text-gray-600 border-gray-300 hover:bg-red-50 hover:text-red-600'">
                             <svg xmlns="http://www.w3.org/2000/svg"
-                                class="h-5 w-5 {{ $article->isLikedBy(auth()->user()) ? 'fill-current' : 'stroke-current fill-none' }}"
+                                class="h-5 w-5 transition-transform"
+                                :class="{ 
+                                    'fill-current': liked, 
+                                    'stroke-current fill-none': !liked,
+                                    'like-anim': animating 
+                                }"
                                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                             </svg>
-                            <span class="font-semibold">{{ $article->totalLikes() }}</span>
+                            <span class="font-semibold" x-text="likesCount"></span>
                         </button>
-                    </form>
 
-                    {{-- DISLIKE --}}
-                    <form action="{{ route('articles.dislike', $article->id) }}" method="POST">
-                        @csrf
-                        <button
-                            class="group p-2 rounded-full transition border
-                            {{ $article->isDislikedBy(auth()->user())
+                        {{-- DISLIKE --}}
+                        <button @click="toggleDislike()"
+                            class="group p-2 rounded-full transition border"
+                            :class="disliked
                                 ? 'bg-red-500 text-white border-red-600'
-                                : 'text-gray-500 border-gray-300 hover:text-red-600 hover:bg-red-50' }}">
+                                : 'text-gray-500 border-gray-300 hover:text-red-600 hover:bg-red-50'">
                             <svg xmlns="http://www.w3.org/2000/svg"
-                                class="h-6 w-6 {{ $article->isDislikedBy(auth()->user()) ? 'stroke-white' : '' }}"
+                                class="h-6 w-6"
+                                :class="disliked ? 'stroke-white' : ''"
                                 fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l3.76.94m-7 10v5a2 2 0 002 2h.096c.5 0 .905-.405.905-.904 0-.715.211-1.413.608-2.008L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5" />
                             </svg>
                         </button>
-                    </form>
+                    </div>
 
                     {{-- REPORT --}}
                     <div x-data="{ openReportModal: false, reason: '', details: '' }">
