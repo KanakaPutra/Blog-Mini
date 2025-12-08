@@ -5,65 +5,49 @@
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <a href="{{ route('dashboard') }}">
-                        <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
-                    </a>
-                </div>
-
-                <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex items-center">
-                    <!-- Dashboard -->
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
-                    </x-nav-link>
-
-                    <!-- Index Dropdown -->
-                    <div class="relative" x-data="{ hover: false }" @mouseenter="hover = true"
-                        @mouseleave="hover = false">
-                        <button @click="openIndex = !openIndex"
-                            class="inline-flex items-center px-3 py-2 border-b-2 text-sm font-medium focus:outline-none transition ease-in-out duration-150
-                                {{ request()->routeIs('category.show') ? 'border-blue-500 text-gray-900' : 'border-transparent text-gray-700 hover:text-gray-900 hover:border-gray-300' }}">
-                            {{ __('Index') }}
-                            <svg :class="{ 'rotate-180': openIndex }"
-                                class="ms-1 h-4 w-4 transform transition-transform duration-200"
-                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                                stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
-                            </svg>
-                        </button>
-
-                        <div x-show="openIndex" x-cloak x-transition.opacity.duration.150ms
-                            @click.away="openIndex = false"
-                            class="absolute top-full left-0 mt-0 w-48 bg-white border border-gray-100 rounded-md shadow-lg z-50">
-                            @foreach ($categories as $category)
-                                <a href="{{ route('category.show', $category->id) }}" @click="openIndex = false"
-                                    class="block px-4 py-2 text-sm rounded-sm
-                                       {{ request()->is('category/' . $category->id) ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-gray-700 hover:bg-gray-100' }}">
-                                    {{ $category->name }}
-                                </a>
-                            @endforeach
+                    @unless(auth()->check() && auth()->user()->is_admin >= 1)
+                            <a href="{{ route('dashboard') }}">
+                                <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
+                            </a>
                         </div>
-                    </div>
 
-                    <!-- Admin -->
-                    @auth
-                        @if(auth()->user()->is_admin >= 1)
-                            <x-nav-link :href="route('articles.index')" :active="request()->routeIs('articles.*')">
-                                {{ __('Articles') }}
+                        <!-- Navigation Links -->
+                        <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex items-center">
+                            <!-- Dashboard -->
+                            <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                                {{ __('Dashboard') }}
                             </x-nav-link>
-                        @endif
 
-                        <!-- Super Admin -->
-                        @if(auth()->user()->is_admin == 2)
-                            <x-nav-link :href="route('superadmin.users')" :active="request()->routeIs('superadmin.users')">
-                                {{ __('Manage Users') }}
-                            </x-nav-link>
-                            <x-nav-link :href="route('superadmin.settings')"
-                                :active="request()->routeIs('superadmin.settings')">
-                                {{ __('Settings') }}
-                            </x-nav-link>
-                        @endif
-                    @endauth
+                            <!-- Index Dropdown -->
+                            <div class="relative" x-data="{ hover: false }" @mouseenter="hover = true"
+                                @mouseleave="hover = false">
+                                <button @click="openIndex = !openIndex"
+                                    class="inline-flex items-center px-3 py-2 border-b-2 text-sm font-medium focus:outline-none transition ease-in-out duration-150
+                                                {{ request()->routeIs('category.show') ? 'border-blue-500 text-gray-900' : 'border-transparent text-gray-700 hover:text-gray-900 hover:border-gray-300' }}">
+                                    {{ __('Index') }}
+                                    <svg :class="{ 'rotate-180': openIndex }"
+                                        class="ms-1 h-4 w-4 transform transition-transform duration-200"
+                                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                                        stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                                    </svg>
+                                </button>
+
+                                <div x-show="openIndex" x-cloak x-transition.opacity.duration.150ms
+                                    @click.away="openIndex = false"
+                                    class="absolute top-full left-0 mt-0 w-48 bg-white border border-gray-100 rounded-md shadow-lg z-50">
+                                    @foreach ($categories as $category)
+                                        <a href="{{ route('category.show', $category->id) }}" @click="openIndex = false"
+                                            class="block px-4 py-2 text-sm rounded-sm
+                                                                   {{ request()->is('category/' . $category->id) ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-gray-700 hover:bg-gray-100' }}">
+                                            {{ $category->name }}
+                                        </a>
+                                    @endforeach
+                                </div>
+                            </div>
+                    @endunless
+
+
                 </div>
             </div>
 
@@ -129,46 +113,29 @@
     <!-- Responsive Navigation Menu -->
     <div :class="{ 'block': open, 'hidden': !open }" class="hidden sm:hidden" x-cloak>
         <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                {{ __('Dashboard') }}
-            </x-responsive-nav-link>
-
+            @unless(auth()->check() && auth()->user()->is_admin >= 1)
+                    <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                    {{ __('Dashboard') }}
+                </x-responsive-nav-link>
+            @endunless
             <!-- Index Menu -->
-            @if (isset($categories))
-                <div class="border-t border-gray-200 mt-2"></div>
-                <div class="px-4 pt-2">
-                    <p class="text-sm text-gray-600 font-semibold mb-2">{{ __('Index') }}</p>
-                    @foreach ($categories as $category)
-                        <a href="{{ route('category.show', $category->id) }}"
-                            class="block px-3 py-1.5 text-sm rounded-md 
-                                   {{ request()->is('category/' . $category->id) ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-gray-700 hover:bg-gray-100' }}">
-                            {{ $category->name }}
-                        </a>
-                    @endforeach
-                </div>
-            @endif
-
-            @auth
-                @if(auth()->user()->is_admin >= 1)
-                    <x-responsive-nav-link :href="route('articles.index')" :active="request()->routeIs('articles.*')">
-                        {{ __('Articles') }}
-                    </x-responsive-nav-link>
-                @endif
-
-                @if(auth()->user()->is_admin == 2)
-                    <div class="border-t border-gray-200 mt-2 px-4 pt-2">
-                        <p class="text-sm text-gray-600 font-semibold mb-2">{{ __('Super Admin Panel') }}</p>
-                        <a href="{{ route('superadmin.users') }}"
-                            class="block px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100">
-                            {{ __('Manage Users') }}
-                        </a>
-                        <a href="{{ route('superadmin.settings') }}"
-                            class="block px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100">
-                            {{ __('Settings') }}
-                        </a>
+            @unless(auth()->check() && auth()->user()->is_admin >= 1)
+                @if (isset($categories))
+                    <div class="border-t border-gray-200 mt-2"></div>
+                    <div class="px-4 pt-2">
+                        <p class="text-sm text-gray-600 font-semibold mb-2">{{ __('Index') }}</p>
+                        @foreach ($categories as $category)
+                            <a href="{{ route('category.show', $category->id) }}"
+                                class="block px-3 py-1.5 text-sm rounded-md 
+                                                               {{ request()->is('category/' . $category->id) ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-gray-700 hover:bg-gray-100' }}">
+                                {{ $category->name }}
+                            </a>
+                        @endforeach
                     </div>
                 @endif
-            @endauth
+            @endunless
+
+
         </div>
 
         <!-- Responsive User Menu -->
