@@ -64,9 +64,12 @@ class AiChat extends Component
             return;
         }
 
-        // Cek limit hanya untuk user biasa (is_admin = 0)
-        $isAdmin = (int) Auth::user()->is_admin > 0;
+        // Auth Checks
+        $userLevel = (int) Auth::user()->is_admin;
+        $isAdmin = $userLevel > 0;      // 1 or 2 (Regular Admin or Super Admin)
+        $isSuperAdmin = $userLevel === 2; // Only Super Admin
 
+        // Cek limit: Admin (level > 0) unlimited, User biasa dicek limit only if not admin
         if (!$isAdmin && $this->remainingMessages <= 0) {
             $this->messages[] = ['role' => 'assistant', 'content' => 'Maaf, kuota harian kamu sudah habis. Silakan kembali lagi besok!'];
             return;
@@ -87,11 +90,43 @@ class AiChat extends Component
             $this->incrementUsage();
         }
 
-        // Call Gemini API
-        $response = $this->generateResponse($input);
+        // Call Gemini API - Pass $isSuperAdmin for command capability
+        $response = $this->generateResponse($input, $isSuperAdmin);
+
+        // Check for JSON command (create_category) - ONLY Super Admin
+        if ($isSuperAdmin && $this->processAiCommand($response)) {
+            $this->isLoading = false;
+            return;
+        }
 
         $this->messages[] = ['role' => 'assistant', 'content' => $response];
         $this->isLoading = false;
+    }
+
+    private function processAiCommand($response)
+    {
+        try {
+            // Coba cari JSON di dalam response
+            if (preg_match('/\{.*"action":\s*"create_category".*\}/s', $response, $matches)) {
+                $json = json_decode($matches[0], true);
+
+                if (isset($json['action']) && $json['action'] === 'create_category' && !empty($json['name'])) {
+                    $categoryName = $json['name'];
+
+                    // Cek apakah kategori sudah ada
+                    if (Category::where('name', $categoryName)->exists()) {
+                        $this->messages[] = ['role' => 'assistant', 'content' => "Kategori **'$categoryName'** sudah ada."];
+                    } else {
+                        Category::create(['name' => $categoryName]);
+                        $this->messages[] = ['role' => 'assistant', 'content' => "Siap! Kategori **'$categoryName'** berhasil dibuat."];
+                    }
+                    return true;
+                }
+            }
+        } catch (\Exception $e) {
+            Log::error('AI Command Parsing Error: ' . $e->getMessage());
+        }
+        return false;
     }
 
     private function incrementUsage()
@@ -156,7 +191,7 @@ class AiChat extends Component
         }
     }
 
-    private function generateResponse($input)
+    private function generateResponse($input, $isSuperAdmin = false)
     {
         $apiKey = env('GEMINI_API_KEY');
 
@@ -187,6 +222,22 @@ class AiChat extends Component
                 }
             }
 
+            // Admin Logic for Commands
+            $adminInstructions = "";
+            if ($isSuperAdmin) {
+                $adminInstructions = "\n\nKHUSUS SUPER ADMIN:\n";
+                $adminInstructions .= "KAMU MEMILIKI OTORITAS UNTUK MEMBUAT KATEGORI BARU.\n";
+                $adminInstructions .= "Jika user meminta (baik secara eksplisit maupun implisit) untuk membuat/menambahkan kategori baru, contoh:\n";
+                $adminInstructions .= "- 'buatkan kategori teknologi'\n";
+                $adminInstructions .= "- 'tambah category mesin'\n";
+                $adminInstructions .= "- 'bikin kategori baru namanya gaming'\n";
+                $adminInstructions .= "- 'category mesin'\n";
+                $adminInstructions .= "JANGAN membalas dengan teks biasa atau pertanyaan konfirmasi.\n";
+                $adminInstructions .= "Berikan respon HANYA dalam format JSON seperti ini:\n";
+                $adminInstructions .= "{\"action\": \"create_category\", \"name\": \"Nama Kategori\"}\n";
+                $adminInstructions .= "Ambil nama kategori dari permintaan user. Pastikan diawali huruf kapital.\n";
+            }
+
             // Correct and updated Gemini endpoint
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json',
@@ -206,6 +257,8 @@ INFORMASI KOTAK DEVELOPER BLOG:
 email: kanakawicaksono@gmail.com
 instagram: @kaaaiiiyy
 {$contextInfo}
+{$adminInstructions}
+
 Gunakan informasi blog di atas untuk menjawab pertanyaan yang relevan tentang konten blog.
 Jika ditanya tentang ringkasan artikel tertentu, gunakan informasi ringkasan yang tersedia di atas.
 Jika user meminta ringkasan artikel yang lebih detail, berikan ringkasan berdasarkan snippet konten yang ada.

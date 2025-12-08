@@ -1,8 +1,10 @@
 <x-app-layout>
-    <div class="max-w-6xl mx-auto py-10 px-6">
+    <div class="max-w-6xl mx-auto py-10 px-6" x-data="{ show: false }" x-init="setTimeout(() => show = true, 100)">
 
         <!-- 📰 Header ala The Archipelago Times -->
-        <div
+        <!-- 📰 Header ala The Archipelago Times -->
+        <div x-show="show" x-transition:enter="transition ease-out duration-700"
+            x-transition:enter-start="opacity-0 translate-y-5" x-transition:enter-end="opacity-100 translate-y-0"
             class="flex flex-col md:flex-row items-center justify-between mb-10 border-b-4 border-double border-gray-800 pb-6 gap-6 md:gap-0">
 
             <!-- Kiri: tanggal -->
@@ -108,14 +110,18 @@
         </h1>
 
         <!-- 📚 Grid Artikel -->
-        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3" x-show="show"
+            x-transition:enter="transition ease-out duration-700 delay-300"
+            x-transition:enter-start="opacity-0 translate-y-5" x-transition:enter-end="opacity-100 translate-y-0">
             @foreach($articles as $article)
                     <div
-                        class="border border-gray-200 rounded-lg bg-white shadow-sm hover:shadow-md transition duration-150 flex flex-col">
+                        class="group border border-gray-200 rounded-lg bg-white shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col">
 
                         @if($article->thumbnail)
-                            <img src="{{ asset('storage/' . $article->thumbnail) }}" alt="{{ $article->title }}"
-                                class="w-full h-48 object-cover rounded-t-lg">
+                            <div class="overflow-hidden rounded-t-lg">
+                                <img src="{{ asset('storage/' . $article->thumbnail) }}" alt="{{ $article->title }}"
+                                    class="w-full h-48 object-cover transform transition-transform duration-500 group-hover:scale-105">
+                            </div>
                         @endif
 
                         <div class="p-4 flex flex-col flex-grow">
@@ -148,7 +154,7 @@
                                 <div class="flex items-center gap-1">
 
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 
-                                                        {{ auth()->check() && $article->isLikedBy(auth()->user())
+                                                                {{ auth()->check() && $article->isLikedBy(auth()->user())
                 ? 'text-red-500 fill-current'
                 : 'text-gray-400 stroke-current fill-none' }}" viewBox="0 0 24 24" stroke="currentColor"
                                         stroke-width="2">

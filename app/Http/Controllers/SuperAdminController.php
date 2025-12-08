@@ -41,10 +41,14 @@ class SuperAdminController extends Controller
     /**
      * 🔹 Halaman Settings (Super Admin)
      */
-    public function settings()
+    public function settings(Request $request)
     {
         // Semua kategori untuk CRUD kategori
         $paginatedCategories = Category::paginate(5);
+
+        if ($request->ajax()) {
+            return view('superadmin.partials.categories-table', compact('paginatedCategories'));
+        }
 
         // Statistik user
         $userCount = User::count();

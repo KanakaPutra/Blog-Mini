@@ -19,11 +19,10 @@
                             </x-nav-link>
 
                             <!-- Index Dropdown -->
-                            <div class="relative" x-data="{ hover: false }" @mouseenter="hover = true"
-                                @mouseleave="hover = false">
-                                <button @click="openIndex = !openIndex"
+                            <div class="relative" @mouseenter="openIndex = true" @mouseleave="openIndex = false">
+                                <button
                                     class="inline-flex items-center px-3 py-2 border-b-2 text-sm font-medium focus:outline-none transition ease-in-out duration-150
-                                                {{ request()->routeIs('category.show') ? 'border-blue-500 text-gray-900' : 'border-transparent text-gray-700 hover:text-gray-900 hover:border-gray-300' }}">
+                                                        {{ request()->routeIs('category.show') ? 'border-blue-500 text-gray-900' : 'border-transparent text-gray-700 hover:text-gray-900 hover:border-gray-300' }}">
                                     {{ __('Index') }}
                                     <svg :class="{ 'rotate-180': openIndex }"
                                         class="ms-1 h-4 w-4 transform transition-transform duration-200"
@@ -33,16 +32,20 @@
                                     </svg>
                                 </button>
 
-                                <div x-show="openIndex" x-cloak x-transition.opacity.duration.150ms
-                                    @click.away="openIndex = false"
+                                <div x-show="openIndex" x-cloak x-transition:enter="transition ease-out duration-200"
+                                    x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+                                    x-transition:leave="transition ease-in duration-75"
+                                    x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
                                     class="absolute top-full left-0 mt-0 w-48 bg-white border border-gray-100 rounded-md shadow-lg z-50">
-                                    @foreach ($categories as $category)
-                                        <a href="{{ route('category.show', $category->id) }}" @click="openIndex = false"
-                                            class="block px-4 py-2 text-sm rounded-sm
-                                                                   {{ request()->is('category/' . $category->id) ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-gray-700 hover:bg-gray-100' }}">
-                                            {{ $category->name }}
-                                        </a>
-                                    @endforeach
+                                    <div class="py-1">
+                                        @foreach ($categories as $category)
+                                            <a href="{{ route('category.show', $category->id) }}"
+                                                class="block px-4 py-2 text-sm rounded-sm transition-colors duration-150
+                                                                    {{ request()->is('category/' . $category->id) ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }}">
+                                                {{ $category->name }}
+                                            </a>
+                                        @endforeach
+                                    </div>
                                 </div>
                             </div>
                     @endunless
@@ -54,8 +57,8 @@
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
                 @if (Auth::check())
-                    <div class="relative">
-                        <button @click="openProfile = !openProfile"
+                    <div class="relative" @mouseenter="openProfile = true" @mouseleave="openProfile = false">
+                        <button
                             class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
                             <div>{{ Auth::user()->name }}</div>
                             <svg :class="{ 'rotate-180': openProfile }"
@@ -66,24 +69,28 @@
                             </svg>
                         </button>
 
-                        <div x-show="openProfile" x-cloak x-transition.opacity.duration.150ms
-                            @click.away="openProfile = false"
+                        <div x-show="openProfile" x-cloak x-transition:enter="transition ease-out duration-200"
+                            x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
+                            x-transition:leave="transition ease-in duration-75"
+                            x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95"
                             class="absolute right-0 mt-2 w-48 bg-white border border-gray-100 rounded-md shadow-lg z-50">
-                            <a href="{{ route('profile.edit') }}"
-                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                {{ __('Profile') }}
-                            </a>
-                            <a href="{{ route('history.like') }}"
-                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                {{ __('Riwayat') }}
-                            </a>
-                            <form method="POST" action="{{ route('logout') }}">
-                                @csrf
-                                <button type="submit"
-                                    class="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                    {{ __('Log Out') }}
-                                </button>
-                            </form>
+                            <div class="py-1">
+                                <a href="{{ route('profile.edit') }}"
+                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150">
+                                    {{ __('Profile') }}
+                                </a>
+                                <a href="{{ route('history.like') }}"
+                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150">
+                                    {{ __('Riwayat') }}
+                                </a>
+                                <form method="POST" action="{{ route('logout') }}">
+                                    @csrf
+                                    <button type="submit"
+                                        class="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150">
+                                        {{ __('Log Out') }}
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 @else
@@ -114,7 +121,7 @@
     <div :class="{ 'block': open, 'hidden': !open }" class="hidden sm:hidden" x-cloak>
         <div class="pt-2 pb-3 space-y-1">
             @unless(auth()->check() && auth()->user()->is_admin >= 1)
-                    <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
+                <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                     {{ __('Dashboard') }}
                 </x-responsive-nav-link>
             @endunless
@@ -127,7 +134,7 @@
                         @foreach ($categories as $category)
                             <a href="{{ route('category.show', $category->id) }}"
                                 class="block px-3 py-1.5 text-sm rounded-md 
-                                                               {{ request()->is('category/' . $category->id) ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-gray-700 hover:bg-gray-100' }}">
+                                                                           {{ request()->is('category/' . $category->id) ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-gray-700 hover:bg-gray-100' }}">
                                 {{ $category->name }}
                             </a>
                         @endforeach
