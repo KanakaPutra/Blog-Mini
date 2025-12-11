@@ -8,9 +8,15 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::table('articles', function (Blueprint $table) {
-            $table->unsignedInteger('likes')->default(0);
-            $table->unsignedInteger('dislikes')->default(0);
-            $table->unsignedInteger('reports')->default(0);
+            if (!Schema::hasColumn('articles', 'likes')) {
+                $table->unsignedInteger('likes')->default(0);
+            }
+            if (!Schema::hasColumn('articles', 'dislikes')) {
+                $table->unsignedInteger('dislikes')->default(0);
+            }
+            if (!Schema::hasColumn('articles', 'reports')) {
+                $table->unsignedInteger('reports')->default(0);
+            }
         });
     }
 

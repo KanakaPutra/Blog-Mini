@@ -4,8 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -13,8 +12,9 @@ return new class extends Migration
     {
         Schema::table('articles', function (Blueprint $table) {
 
-            // 1. Hapus index lama (bukan FK)
-            // Nama index harus persis seperti di dump SQL: articles_category_id_foreign
+            // 1. Hapus foreign key lama
+            // Kita harus drop foreign key dulu, baru nanti bisa ubah kolom
+            $table->dropForeign('articles_category_id_foreign');
             $table->dropIndex('articles_category_id_foreign');
 
             // 2. Ubah kolom category_id menjadi nullable
@@ -22,8 +22,8 @@ return new class extends Migration
 
             // 3. Tambahkan foreign key baru dengan SET NULL
             $table->foreign('category_id')
-                  ->references('id')->on('categories')
-                  ->nullOnDelete();  // ON DELETE SET NULL
+                ->references('id')->on('categories')
+                ->nullOnDelete();  // ON DELETE SET NULL
         });
     }
 
