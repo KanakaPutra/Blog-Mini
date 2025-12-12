@@ -2,7 +2,7 @@
   "version": 2,
   "functions": {
     "api/index.php": {
-      "runtime": "@vercel/php@1.7.0"
+      "runtime": "vercel-php@0.7.4"
     }
   },
   "routes": [
@@ -17,7 +17,7 @@
     "APP_DEBUG": "false",
     "APP_URL": "https://yourproductionurl.com",
 
-    "APP_KEY": "base64:rwjRX25rOhocCAT4xODpmkFyMtH/CVlbdaFcXV6dBa4=", 
+    "APP_KEY": "base64:rwjRX25rOhocCAT4xODpmkFyMtH/CVlbdaFcXV6dBa4=",
     "APP_CONFIG_CACHE": "/tmp/config.php",
     "APP_EVENTS_CACHE": "/tmp/events.php",
     "APP_PACKAGES_CACHE": "/tmp/packages.php",
