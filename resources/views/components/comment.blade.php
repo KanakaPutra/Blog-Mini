@@ -113,6 +113,74 @@
         .finally(() => {
             this.isDeleting = false;
         });
+    },
+    // LIKE functionality
+    isLiked: {{ $comment->isLikedBy(auth()->user()) ? 'true' : 'false' }},
+    likeCount: {{ $comment->likes()->count() }},
+    isLiking: false,
+    toggleLike() {
+        if (this.isLiking) return;
+        this.isLiking = true;
+        
+        // Optimistic UI
+        const originalLiked = this.isLiked;
+        const originalCount = this.likeCount;
+        this.isLiked = !this.isLiked;
+        this.likeCount += this.isLiked ? 1 : -1;
+
+        fetch('/comments/{{ $comment->id }}/like', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            this.isLiked = data.liked;
+            this.likeCount = data.count;
+        })
+        .catch(error => {
+            this.isLiked = originalLiked;
+            this.likeCount = originalCount;
+        })
+        .finally(() => {
+            this.isLiking = false;
+        });
+    },
+
+    // REPORT functionality
+    showReportModal: false,
+    reportReason: '',
+    isReporting: false,
+    submitReport() {
+        if (!this.reportReason.trim()) return;
+        this.isReporting = true;
+        fetch('/comments/{{ $comment->id }}/report', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ reason: this.reportReason })
+        })
+        .then(response => {
+           if (!response.ok) throw new Error('Failed');
+           return response.json();
+        })
+        .then(data => {
+            this.showReportModal = false;
+            this.reportReason = '';
+            alert('Comment reported. Thank you.');
+        })
+        .catch(error => {
+            alert('Failed to report comment.');
+        })
+        .finally(() => {
+            this.isReporting = false;
+        });
     }
 }" x-show="!isDeleted" class="group mb-3">
 
@@ -149,40 +217,49 @@
             </div>
 
             {{-- Action Menu (Three Dots) --}}
-            @if(auth()->id() === $comment->user_id)
-                <div class="absolute top-0 right-0" x-data="{ open: false }">
-                    <button @click="open = !open" @click.away="open = false" class="text-gray-400 hover:text-gray-700 p-1.5 rounded-full hover:bg-gray-100 transition-all focus:outline-none focus:ring-2 focus:ring-gray-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
+            <div class="absolute top-0 right-0" x-data="{ open: false }">
+                @if(auth()->check())
+                <button @click="open = !open" @click.away="open = false" class="text-gray-400 hover:text-gray-700 p-1.5 rounded-full hover:bg-gray-100 transition-all focus:outline-none focus:ring-2 focus:ring-gray-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
+                    </svg>
+                </button>
+                @endif
+                
+                <div x-show="open" 
+                        x-transition:enter="transition ease-out duration-100"
+                        x-transition:enter-start="transform opacity-0 scale-95"
+                        x-transition:enter-end="transform opacity-100 scale-100"
+                        x-transition:leave="transition ease-in duration-75"
+                        x-transition:leave-start="transform opacity-100 scale-100"
+                        x-transition:leave-end="transform opacity-0 scale-95"
+                        style="display: none;"
+                        class="absolute right-0 mt-1 w-36 bg-white rounded-xl shadow-xl border border-gray-100 py-1.5 z-20 ring-1 ring-black ring-opacity-5 overflow-hidden">
+                    
+                    @if(auth()->id() === $comment->user_id)
+                    <button @click="open = false; originalContent = editContent; isEditing = true; $nextTick(() => $refs.editInput.focus())" class="w-full text-left px-4 py-2.5 text-xs font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
                         </svg>
+                        Edit
                     </button>
                     
-                    <div x-show="open" 
-                         x-transition:enter="transition ease-out duration-100"
-                         x-transition:enter-start="transform opacity-0 scale-95"
-                         x-transition:enter-end="transform opacity-100 scale-100"
-                         x-transition:leave="transition ease-in duration-75"
-                         x-transition:leave-start="transform opacity-100 scale-100"
-                         x-transition:leave-end="transform opacity-0 scale-95"
-                         style="display: none;"
-                         class="absolute right-0 mt-1 w-36 bg-white rounded-xl shadow-xl border border-gray-100 py-1.5 z-20 ring-1 ring-black ring-opacity-5 overflow-hidden">
-                        
-                        <button @click="open = false; originalContent = editContent; isEditing = true; $nextTick(() => $refs.editInput.focus())" class="w-full text-left px-4 py-2.5 text-xs font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition-colors">
+                    <button @click="open = false; deleteComment()" class="w-full text-left px-4 py-2.5 text-xs font-medium text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                        </svg>
+                        Delete
+                    </button>
+                    @else
+                    <button @click="open = false; showReportModal = true" class="w-full text-left px-4 py-2.5 text-xs font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                            </svg>
-                            Edit
-                        </button>
-                        
-                        <button @click="open = false; deleteComment()" class="w-full text-left px-4 py-2.5 text-xs font-medium text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-500" viewBox="0 0 20 20" fill="currentColor">
-                                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-                            </svg>
-                            Delete
-                        </button>
-                    </div>
+                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                        </svg>
+                        Report
+                    </button>
+                    @endif
                 </div>
-            @endif
+            </div>
 
             {{-- Konten --}}
             <div x-show="!isEditing" class="text-sm text-gray-800 mt-0.5 leading-relaxed">
@@ -210,6 +287,25 @@
             {{-- Actions: Reply --}}
             <div class="flex items-center gap-4 mt-1.5">
                 @auth
+                    {{-- Like Button --}}
+                    <button @click="toggleLike" 
+                        class="flex items-center gap-1.5 text-xs font-semibold py-1 px-1 rounded-full transition-all active:scale-90"
+                        :class="isLiked ? 'text-red-500' : 'text-gray-400 hover:text-gray-600'">
+                        
+                        <div class="relative">
+                            <svg xmlns="http://www.w3.org/2000/svg" 
+                                class="h-4 w-4 transition-all duration-300 transform"
+                                :class="isLiked ? 'fill-current scale-110' : 'fill-white scale-100'" 
+                                viewBox="0 0 24 24" 
+                                stroke="currentColor" 
+                                stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                            </svg>
+                        </div>
+                        
+                        <span x-text="likeCount" class="transition-colors duration-300"></span>
+                    </button>
+
                     <button @click="
                                 showReplyForm = !showReplyForm; 
                                 $nextTick(() => $refs.replyInput.focus());
@@ -265,6 +361,53 @@
                     </form>
                 </div>
             @endauth
+        </div>
+    </div>
+
+    {{-- Report Modal --}}
+    <div x-show="showReportModal" style="display: none;" 
+        class="fixed inset-0 z-[60] overflow-y-auto" 
+        aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <div x-show="showReportModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" 
+                class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="showReportModal = false"></div>
+
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+
+            <div x-show="showReportModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100" x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                            <svg class="h-6 w-6 text-red-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                                Report Comment
+                            </h3>
+                            <div class="mt-2">
+                                <p class="text-sm text-gray-500 mb-4">
+                                    Please explain why you are reporting this comment.
+                                </p>
+                                <textarea x-model="reportReason" rows="3" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-red-500 focus:border-red-500 sm:text-sm" placeholder="Reason..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="button" @click="submitReport" :disabled="!reportReason.trim() || isReporting"
+                        class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50">
+                        <span x-show="!isReporting">Submit Report</span>
+                        <span x-show="isReporting" class="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
+                    </button>
+                    <button type="button" @click="showReportModal = false"
+                        class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        Cancel
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 

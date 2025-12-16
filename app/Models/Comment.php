@@ -40,6 +40,26 @@ class Comment extends Model
         return $this->belongsTo(Comment::class, 'parent_id');
     }
 
+    // Likes relationship
+    public function likes()
+    {
+        return $this->hasMany(CommentLike::class);
+    }
+
+    // Reports relationship
+    public function reports()
+    {
+        return $this->hasMany(CommentReport::class);
+    }
+
+    // Helper to check if user liked the comment
+    public function isLikedBy($user)
+    {
+        if (!$user)
+            return false;
+        return $this->likes()->where('user_id', $user->id)->exists();
+    }
+
     // Hitung total balasan (recursive)
     public function getTotalRepliesCountAttribute()
     {
