@@ -107,20 +107,54 @@ class AiChat extends Component
     {
         try {
             // Coba cari JSON di dalam response
-            if (preg_match('/\{.*"action":\s*"create_category".*\}/s', $response, $matches)) {
+            if (preg_match('/\{.*"action":\s*"(create|delete|update)_category".*\}/s', $response, $matches)) {
                 $json = json_decode($matches[0], true);
 
-                if (isset($json['action']) && $json['action'] === 'create_category' && !empty($json['name'])) {
+                if (isset($json['action']) && !empty($json['name'])) {
                     $categoryName = $json['name'];
+                    $action = $json['action'];
 
-                    // Cek apakah kategori sudah ada
-                    if (Category::where('name', $categoryName)->exists()) {
-                        $this->messages[] = ['role' => 'assistant', 'content' => "Kategori **'$categoryName'** sudah ada."];
-                    } else {
-                        Category::create(['name' => $categoryName]);
-                        $this->messages[] = ['role' => 'assistant', 'content' => "Siap! Kategori **'$categoryName'** berhasil dibuat."];
+                    if ($action === 'create_category') {
+                        // Cek apakah kategori sudah ada
+                        if (Category::where('name', $categoryName)->exists()) {
+                            $this->messages[] = ['role' => 'assistant', 'content' => "Kategori **'$categoryName'** sudah ada."];
+                        } else {
+                            Category::create(['name' => $categoryName]);
+                            $this->messages[] = ['role' => 'assistant', 'content' => "Siap! Kategori **'$categoryName'** berhasil dibuat."];
+                        }
+                        return true;
+                    } elseif ($action === 'delete_category') {
+                        // Cek apakah kategori ada
+                        $category = Category::where('name', $categoryName)->first();
+
+                        if ($category) {
+                            $category->delete();
+                            $this->messages[] = ['role' => 'assistant', 'content' => "Siap! Kategori **'$categoryName'** berhasil dihapus."];
+                        } else {
+                            $this->messages[] = ['role' => 'assistant', 'content' => "Maaf, kategori **'$categoryName'** tidak ditemukan."];
+                        }
+                        return true;
+                    } elseif ($action === 'update_category' && !empty($json['new_name'])) {
+                        $newName = $json['new_name'];
+
+                        // Cek apakah kategori ada
+                        $category = Category::where('name', $categoryName)->first();
+
+                        if (!$category) {
+                            $this->messages[] = ['role' => 'assistant', 'content' => "Maaf, kategori **'$categoryName'** tidak ditemukan."];
+                            return true;
+                        }
+
+                        // Cek conflict nama baru
+                        if (Category::where('name', $newName)->exists()) {
+                            $this->messages[] = ['role' => 'assistant', 'content' => "Gagal ubah nama. Kategori **'$newName'** sudah ada."];
+                            return true;
+                        }
+
+                        $category->update(['name' => $newName]);
+                        $this->messages[] = ['role' => 'assistant', 'content' => "Siap! Kategori **'$categoryName'** berhasil diubah menjadi **'$newName'**."];
+                        return true;
                     }
-                    return true;
                 }
             }
         } catch (\Exception $e) {
@@ -231,10 +265,19 @@ class AiChat extends Component
                 $adminInstructions .= "- 'buatkan kategori teknologi'\n";
                 $adminInstructions .= "- 'tambah category mesin'\n";
                 $adminInstructions .= "- 'bikin kategori baru namanya gaming'\n";
-                $adminInstructions .= "- 'category mesin'\n";
+                $adminInstructions .= "  - 'Category Mesin'\n";
+                $adminInstructions .= "2. MENGHAPUS KATEGORI:\n";
+                $adminInstructions .= "Jika user meminta untuk menghapus kategori, contoh: 'hapus kategori teknologi', 'delete category gaming'.\n";
+                $adminInstructions .= "3. MENGUBAH / RENAME KATEGORI:\n";
+                $adminInstructions .= "Jika user meminta mengubah nama kategori, contoh:\n";
+                $adminInstructions .= "  - 'ganti nama kategori teknologi jadi sains'\n";
+                $adminInstructions .= "  - 'ubah kategori A ke B'\n";
+
                 $adminInstructions .= "JANGAN membalas dengan teks biasa atau pertanyaan konfirmasi.\n";
-                $adminInstructions .= "Berikan respon HANYA dalam format JSON seperti ini:\n";
+                $adminInstructions .= "Berikan respon HANYA dalam format JSON. Pilih salah satu:\n";
                 $adminInstructions .= "{\"action\": \"create_category\", \"name\": \"Nama Kategori\"}\n";
+                $adminInstructions .= "{\"action\": \"delete_category\", \"name\": \"Nama Kategori\"}\n";
+                $adminInstructions .= "{\"action\": \"update_category\", \"name\": \"Nama Lama\", \"new_name\": \"Nama Baru\"}\n";
                 $adminInstructions .= "Ambil nama kategori dari permintaan user. Pastikan diawali huruf kapital.\n";
             }
 
