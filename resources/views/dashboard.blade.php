@@ -119,7 +119,7 @@
 
                         @if($article->thumbnail)
                             <div class="overflow-hidden rounded-t-lg">
-                                <img src="{{ asset('storage/' . $article->thumbnail) }}" alt="{{ $article->title }}"
+                                <img src="{{ $article->thumbnail_url }}" alt="{{ $article->title }}"
                                     class="w-full h-48 object-cover transform transition-transform duration-500 group-hover:scale-105">
                             </div>
                         @endif
@@ -154,7 +154,7 @@
                                 <div class="flex items-center gap-1">
 
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 
-                                                                {{ auth()->check() && $article->isLikedBy(auth()->user())
+                                                                        {{ auth()->check() && $article->isLikedBy(auth()->user())
                 ? 'text-red-500 fill-current'
                 : 'text-gray-400 stroke-current fill-none' }}" viewBox="0 0 24 24" stroke="currentColor"
                                         stroke-width="2">

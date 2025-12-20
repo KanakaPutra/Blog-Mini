@@ -29,7 +29,7 @@
                         class="border border-gray-200 rounded-lg bg-white shadow-sm hover:shadow-md transition duration-150 flex flex-col">
 
                         @if($article->thumbnail)
-                            <img src="{{ asset('storage/' . $article->thumbnail) }}" alt="{{ $article->title }}"
+                            <img src="{{ $article->thumbnail_url }}" alt="{{ $article->title }}"
                                 class="w-full h-48 object-cover rounded-t-lg">
                         @endif
 

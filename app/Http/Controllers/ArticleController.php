@@ -8,6 +8,7 @@ use App\Models\ArticleLike;
 use App\Models\ArticleReport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
 
 class ArticleController extends Controller
 {
@@ -78,9 +79,36 @@ class ArticleController extends Controller
             'thumbnail' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        $thumbnailPath = $request->hasFile('thumbnail')
-            ? $request->file('thumbnail')->store('thumbnails', 'public')
-            : null;
+        $thumbnailPath = null;
+        if ($request->hasFile('thumbnail')) {
+            $file = $request->file('thumbnail');
+            $filename = uniqid() . '.' . $file->getClientOriginalExtension();
+            $path = 'articles/' . $filename;
+
+            $supabaseUrl = env('SUPABASE_URL');
+            $supabaseKey = env('SUPABASE_SERVICE_ROLE_KEY');
+
+            if (!$supabaseUrl || !$supabaseKey) {
+                return back()->withErrors(['thumbnail' => 'Konfigurasi Supabase belum lengkap di file .env.'])->withInput();
+            }
+
+            $response = Http::withHeaders([
+                'Authorization' => 'Bearer ' . $supabaseKey,
+            ])->attach(
+                    'file',
+                    file_get_contents($file->getRealPath()),
+                    $filename
+                )->post(
+                    rtrim($supabaseUrl, '/') . '/storage/v1/object/images/' . $path
+                );
+
+            if ($response->successful()) {
+                $thumbnailPath = rtrim($supabaseUrl, '/') . '/storage/v1/object/public/images/' . $path;
+            } else {
+                $error = $response->json('error') ?? $response->json('message') ?? $response->body();
+                return back()->withErrors(['thumbnail' => 'Gagal mengunggah ke Supabase: ' . $error])->withInput();
+            }
+        }
 
         $data = $request->only('title', 'content', 'category_id');
         $data['user_id'] = Auth::id();
@@ -119,7 +147,33 @@ class ArticleController extends Controller
             $data = $request->only('title', 'content', 'category_id');
 
             if ($request->hasFile('thumbnail')) {
-                $data['thumbnail'] = $request->file('thumbnail')->store('thumbnails', 'public');
+                $file = $request->file('thumbnail');
+                $filename = uniqid() . '.' . $file->getClientOriginalExtension();
+                $path = 'articles/' . $filename;
+
+                $supabaseUrl = env('SUPABASE_URL');
+                $supabaseKey = env('SUPABASE_SERVICE_ROLE_KEY');
+
+                if (!$supabaseUrl || !$supabaseKey) {
+                    return back()->withErrors(['thumbnail' => 'Konfigurasi Supabase belum lengkap di file .env.'])->withInput();
+                }
+
+                $response = Http::withHeaders([
+                    'Authorization' => 'Bearer ' . $supabaseKey,
+                ])->attach(
+                        'file',
+                        file_get_contents($file->getRealPath()),
+                        $filename
+                    )->post(
+                        rtrim($supabaseUrl, '/') . '/storage/v1/object/images/' . $path
+                    );
+
+                if ($response->successful()) {
+                    $data['thumbnail'] = rtrim($supabaseUrl, '/') . '/storage/v1/object/public/images/' . $path;
+                } else {
+                    $error = $response->json('error') ?? $response->json('message') ?? $response->body();
+                    return back()->withErrors(['thumbnail' => 'Gagal mengunggah ke Supabase: ' . $error])->withInput();
+                }
             }
 
             $article->update($data);

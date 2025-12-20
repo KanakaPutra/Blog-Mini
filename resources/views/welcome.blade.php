@@ -10,7 +10,8 @@
                 <div
                     class="text-gray-600 text-sm font-serif hover:text-gray-900 transition-colors duration-300 cursor-default">
                     <p class="uppercase tracking-widest text-xs font-bold mb-1">
-                        {{ \Carbon\Carbon::now('Asia/Jakarta')->translatedFormat('l, F d, Y') }}</p>
+                        {{ \Carbon\Carbon::now('Asia/Jakarta')->translatedFormat('l, F d, Y') }}
+                    </p>
                     <p class="italic text-lg">Today's Paper</p>
                 </div>
             </div>
@@ -113,7 +114,7 @@
                     class="border border-gray-200 rounded-lg bg-white shadow-sm hover:shadow-md transition duration-150 flex flex-col">
 
                     @if($article->thumbnail)
-                        <img src="{{ asset('storage/' . $article->thumbnail) }}" alt="{{ $article->title }}"
+                        <img src="{{ $article->thumbnail_url }}" alt="{{ $article->title }}"
                             class="w-full h-48 object-cover rounded-t-lg">
                     @endif
 

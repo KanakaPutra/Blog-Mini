@@ -24,7 +24,7 @@
 
                     <!-- ALL ARTIKEL -->
                     <a href="{{ route('articles.index') }}" class="px-4 py-2 rounded-md text-sm font-medium
-                                {{ request('filter') == 'mine'
+                                        {{ request('filter') == 'mine'
                     ? 'bg-gray-200 text-gray-700'
                     : 'bg-blue-600 text-white hover:bg-blue-700' }}">
                         Semua Artikel
@@ -32,7 +32,7 @@
 
                     <!-- ARTIKEL SAYA -->
                     <a href="{{ route('articles.index', ['filter' => 'mine']) }}" class="px-4 py-2 rounded-md text-sm font-medium
-                                {{ request('filter') == 'mine'
+                                        {{ request('filter') == 'mine'
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
                         Artikel Saya
@@ -43,19 +43,19 @@
         @endauth
 
         <!-- LIST ARTIKEL -->
-        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3" x-data="{ loaded: false }" x-init="setTimeout(() => loaded = true, 100)">
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3" x-data="{ loaded: false }"
+            x-init="setTimeout(() => loaded = true, 100)">
 
             @foreach($articles as $article)
-                <div x-show="loaded"
-                     style="transition-delay: {{ $loop->index * 100 }}ms"
-                     x-transition:enter="transition ease-out duration-500"
-                     x-transition:enter-start="opacity-0 transform translate-y-8"
-                     x-transition:enter-end="opacity-100 transform translate-y-0"
-                     class="border border-gray-200 rounded-lg bg-white shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col transform">
+                <div x-show="loaded" style="transition-delay: {{ $loop->index * 100 }}ms"
+                    x-transition:enter="transition ease-out duration-500"
+                    x-transition:enter-start="opacity-0 transform translate-y-8"
+                    x-transition:enter-end="opacity-100 transform translate-y-0"
+                    class="border border-gray-200 rounded-lg bg-white shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col transform">
 
                     @if($article->thumbnail)
                         <div class="relative overflow-hidden rounded-t-lg">
-                            <img src="{{ asset('storage/' . $article->thumbnail) }}"
+                            <img src="{{ $article->thumbnail_url }}"
                                 class="w-full h-48 object-cover transition-transform duration-500 hover:scale-110 {{ $article->suspended ? 'opacity-50' : '' }}"
                                 alt="{{ $article->title }}">
 
@@ -91,7 +91,8 @@
 
                     <div class="p-4 flex flex-col flex-grow">
 
-                        <h2 class="text-lg font-serif font-semibold text-gray-800 mb-1 hover:text-blue-600 transition-colors">
+                        <h2
+                            class="text-lg font-serif font-semibold text-gray-800 mb-1 hover:text-blue-600 transition-colors">
                             <a href="{{ route('articles.show', $article->id) }}">
                                 {{ $article->title }}
                             </a>
@@ -117,8 +118,11 @@
                             <a href="{{ route('articles.show', $article->id) }}"
                                 class="text-blue-600 hover:underline text-sm font-medium group flex items-center gap-1">
                                 Lihat Selengkapnya
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transform transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                    class="h-4 w-4 transform transition-transform group-hover:translate-x-1" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M14 5l7 7m0 0l-7 7m7-7H3" />
                                 </svg>
                             </a>
 
