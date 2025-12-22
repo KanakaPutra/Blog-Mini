@@ -14,10 +14,16 @@ use Illuminate\Support\Facades\Cache;
 
 class AiChat extends Component
 {
-    public $isOpen = false;
     public $messages = [];
     public $userMessage = '';
-    public $isLoading = false;
+    public $isAdmin = false;
+    public $suggestions = [
+        'Apa itu The Archipelago Times?',
+        'Tampilkan artikel terbaru',
+        'Buatkan ringkasan berita hari ini',
+        'Bagaimana cara menjadi penulis?',
+        'Daftar kategori yang ada'
+    ];
 
     // Rate Limiting
     public $dailyLimit = 25;
@@ -38,9 +44,11 @@ class AiChat extends Component
             // Admin & Super Admin unlimited (is_admin > 0)
             if ((int) Auth::user()->is_admin > 0) {
                 $this->remainingMessages = 9999; // Indikator unlimited
+                $this->isAdmin = true;
                 return;
             }
 
+            $this->isAdmin = false;
             $userId = Auth::id();
             $today = now()->format('Y-m-d');
             $cacheKey = "ai_chat_limit:{$userId}:{$today}";
@@ -49,6 +57,7 @@ class AiChat extends Component
             $this->remainingMessages = max(0, $this->dailyLimit - $used);
         } else {
             $this->remainingMessages = 0;
+            $this->isAdmin = false;
         }
     }
 
@@ -56,6 +65,21 @@ class AiChat extends Component
     {
         $this->isOpen = !$this->isOpen;
     }
+
+    public function selectSuggestion($suggestion)
+    {
+        $this->userMessage = $suggestion;
+        $this->sendMessage();
+        $this->dispatch('messageSent');
+    }
+
+    public function clearChat()
+    {
+        $this->messages = [
+            ['role' => 'assistant', 'content' => 'Halo! Riwayat chat telah dibersihkan. Ada yang bisa saya bantu lagi?']
+        ];
+    }
+
 
     public function sendMessage()
     {
@@ -83,7 +107,7 @@ class AiChat extends Component
         $this->messages[] = ['role' => 'user', 'content' => $this->userMessage];
         $input = $this->userMessage;
         $this->userMessage = '';
-        $this->isLoading = true;
+        $this->dispatch('messageSent');
 
         // Increment usage only for normal users
         if (!$isAdmin) {
@@ -95,12 +119,10 @@ class AiChat extends Component
 
         // Check for JSON command (create_category) - ONLY Super Admin
         if ($isSuperAdmin && $this->processAiCommand($response)) {
-            $this->isLoading = false;
             return;
         }
 
         $this->messages[] = ['role' => 'assistant', 'content' => $response];
-        $this->isLoading = false;
     }
 
     private function processAiCommand($response)
