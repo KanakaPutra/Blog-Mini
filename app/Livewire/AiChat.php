@@ -70,7 +70,6 @@ class AiChat extends Component
     {
         $this->userMessage = $suggestion;
         $this->sendMessage();
-        $this->dispatch('messageSent');
     }
 
     public function clearChat()
@@ -81,8 +80,12 @@ class AiChat extends Component
     }
 
 
-    public function sendMessage()
+    public function sendMessage($message = null)
     {
+        if ($message) {
+            $this->userMessage = $message;
+        }
+
         if (!Auth::check()) {
             $this->messages[] = ['role' => 'assistant', 'content' => 'Maaf, kamu harus login terlebih dahulu untuk menggunakan fitur ini.'];
             return;

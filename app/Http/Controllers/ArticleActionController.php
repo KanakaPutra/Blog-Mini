@@ -5,37 +5,42 @@ use Illuminate\Http\Request;
 
 class ArticleActionController extends Controller
 {
-    public function react(Request $request, Article $article)
-    {
-        $request->validate([
-            'type' => 'required|in:like,dislike'
-        ]);
+public function react(Request $request, Article $article)
+{
+$request->validate([
+'type' => 'required|in:like,dislike'
+]);
 
-        $existing = $article->likes()
-            ->where('user_id', auth()->id())
-            ->first();
+$existing = $article->likes()
+->where('user_id', auth()->id())
+->first();
 
-        if ($existing) {
-            $existing->update(['type' => $request->type]);
-        } else {
-            $article->likes()->create([
-                'user_id' => auth()->id(),
-                'type' => $request->type
-            ]);
-        }
+if ($existing) {
+$existing->update(['type' => $request->type]);
+} else {
+$existing = $article->likes()->create([
+'user_id' => auth()->id(),
+'type' => $request->type
+]);
+}
 
-        return back()->with('success', 'Aksi berhasil!');
-    }
+// Trigger notification if it's a like and not from the author
+if ($request->type === 'like' && $article->user_id !== auth()->id()) {
+$article->user->notify(new \App\Notifications\ArticleLiked(auth()->user(), $article));
+}
 
-    public function report(Request $request, Article $article)
-    {
-        $request->validate(['reason' => 'required']);
+return back()->with('success', 'Aksi berhasil!');
+}
 
-        $article->reports()->create([
-            'user_id' => auth()->id(),
-            'reason' => $request->reason,
-        ]);
+public function report(Request $request, Article $article)
+{
+$request->validate(['reason' => 'required']);
 
-        return back()->with('success', 'Artikel telah dilaporkan.');
-    }
+$article->reports()->create([
+'user_id' => auth()->id(),
+'reason' => $request->reason,
+]);
+
+return back()->with('success', 'Artikel telah dilaporkan.');
+}
 }

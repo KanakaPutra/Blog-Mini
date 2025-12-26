@@ -25,14 +25,14 @@
     @if(auth()->check() && auth()->user()->is_admin >= 1)
         {{-- ADMIN LAYOUT --}}
         <div class="h-screen bg-gray-100 flex overflow-hidden" x-data="{ 
-                        sidebarOpen: {{ request()->cookie('sidebar_state', 'true') === 'true' ? 'true' : 'false' }}, 
-                        mobileOpen: false,
-                        init() {
-                            this.$watch('sidebarOpen', value => {
-                                document.cookie = 'sidebar_state=' + value + '; path=/; max-age=31536000; SameSite=Lax';
-                            });
-                        }
-                    }">
+                            sidebarOpen: {{ request()->cookie('sidebar_state', 'true') === 'true' ? 'true' : 'false' }}, 
+                            mobileOpen: false,
+                            init() {
+                                this.$watch('sidebarOpen', value => {
+                                    document.cookie = 'sidebar_state=' + value + '; path=/; max-age=31536000; SameSite=Lax';
+                                });
+                            }
+                        }">
             <!-- Mobile Backdrop -->
             <div class="md:hidden fixed inset-0 z-40 bg-gray-600 bg-opacity-75 transition-opacity" x-show="mobileOpen"
                 x-transition:enter="transition-opacity ease-linear duration-300" x-transition:enter-start="opacity-0"
@@ -45,21 +45,29 @@
 
             <!-- Main Content Wrapper -->
             <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+                <!-- Admin Topbar -->
+                <header class="hidden md:flex items-center justify-end h-16 bg-white border-b border-gray-100 px-8">
+                    <x-notification-dropdown />
+                </header>
+
                 <!-- Admin Mobile Header -->
                 <div
                     class="md:hidden flex items-center justify-between h-16 bg-white border-b border-gray-200 px-4 sm:px-6">
                     <div class="flex items-center">
                         <x-application-logo class="block h-8 w-auto fill-current text-gray-800" />
                     </div>
-                    <button @click="mobileOpen = true"
-                        class="text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500">
-                        <span class="sr-only">Open sidebar</span>
-                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                            stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 6h16M4 12h16M4 18h16" />
-                        </svg>
-                    </button>
+                    <div class="flex items-center space-x-2">
+                        <x-notification-dropdown />
+                        <button @click="mobileOpen = true"
+                            class="text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500">
+                            <span class="sr-only">Open sidebar</span>
+                            <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Page Content -->

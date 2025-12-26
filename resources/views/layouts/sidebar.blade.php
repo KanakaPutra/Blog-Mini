@@ -108,7 +108,7 @@
                 <div class="relative border-l-2 border-gray-100 pl-2 ml-1 py-1 space-y-1">
                     @foreach (\App\Models\Category::all() as $category)
                                     <a href="{{ route('category.show', $category->id) }}" class="block px-3 py-2 text-sm rounded-lg transition-all duration-200
-                                                           {{ request()->is('category/' . $category->id)
+                                                                           {{ request()->is('category/' . $category->id)
                         ? 'bg-blue-50 text-blue-600 font-semibold'
                         : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50 hover:pl-4' }}">
                                         {{ $category->name }}
@@ -134,7 +134,7 @@
                     @foreach (\App\Models\Category::all() as $category)
                         <a href="{{ route('category.show', $category->id) }}"
                             class="block px-4 py-2.5 text-sm rounded-lg transition-colors duration-150
-                                {{ request()->is('category/' . $category->id) ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                                    {{ request()->is('category/' . $category->id) ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                             {{ $category->name }}
                         </a>
                     @endforeach
@@ -156,7 +156,7 @@
 
         @if(auth()->user()->is_admin >= 1)
             <a href="{{ route('articles.index') }}" class="relative flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-300 ease-out group
-                                   {{ request()->routeIs('articles.index')
+                                       {{ request()->routeIs('articles.index')
             ? 'bg-blue-50/80 text-blue-600 shadow-sm ring-1 ring-blue-100'
             : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:translate-x-1' }}">
                 <div class="flex-shrink-0 w-6 h-6 flex items-center justify-center">
@@ -192,7 +192,7 @@
             </div>
 
             <a href="{{ route('superadmin.users') }}" class="relative flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-300 ease-out group
-                                   {{ request()->routeIs('superadmin.users')
+                                       {{ request()->routeIs('superadmin.users')
             ? 'bg-blue-50/80 text-blue-600 shadow-sm ring-1 ring-blue-100'
             : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:translate-x-1' }}">
                 <div class="flex-shrink-0 w-6 h-6 flex items-center justify-center">
@@ -218,7 +218,7 @@
             </a>
 
             <a href="{{ route('superadmin.settings') }}" class="relative flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-300 ease-out group
-                                   {{ request()->routeIs('superadmin.settings')
+                                       {{ request()->routeIs('superadmin.settings')
             ? 'bg-blue-50/80 text-blue-600 shadow-sm ring-1 ring-blue-100'
             : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:translate-x-1' }}">
                 <div class="flex-shrink-0 w-6 h-6 flex items-center justify-center">
@@ -283,7 +283,17 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    {{ __('Riwayat') }}
+                    {{ __('Riwayat Like') }}
+                </a>
+
+                <a href="{{ route('notifications.index') }}"
+                    class="flex items-center px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition-colors duration-200 group">
+                    <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-blue-500 transition-colors"
+                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                    {{ __('Riwayat Notifikasi') }}
                 </a>
 
                 <div class="h-px bg-gray-100 my-1"></div>

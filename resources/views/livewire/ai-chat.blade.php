@@ -2,6 +2,33 @@
     open: false, 
     activeTab: 'home',
     isViewingConversation: false,
+    currentArticle: null,
+    articles: {
+        'getting-started': {
+            title: 'Getting started with blog',
+            content: 'Selamat datang di The Archipelago Times! Untuk mulai membaca, kamu bisa menjelajahi berbagai kategori di menu utama. Jika ingin berkontribusi, pastikan kamu sudah mendaftar akun dan memverifikasi email kamu.'
+        },
+        'how-to-write': {
+            title: 'How to write an article',
+            content: 'Menulis artikel sangat mudah. Masuk ke Dashboard Penulis, klik \'Tulis Artikel Baru\', isi judul yang menarik, tambahkan konten berkualitas, dan pilih kategori yang sesuai. Jangan lupa tambahkan thumbnail yang relevan!'
+        },
+        'managing-profile': {
+            title: 'Managing your profile',
+            content: 'Kamu bisa mengubah foto profil, bio, dan pengaturan akun lainnya melalui menu Pengaturan Profil. Pastikan informasi kamu selalu mutakhir agar pembaca bisa mengenal kamu lebih baik.'
+        },
+        'security-best-practices': {
+            title: 'Security best practices',
+            content: 'Selalu gunakan kata sandi yang kuat dan unik. Aktifkan autentikasi dua faktor (2FA) jika tersedia. Jangan pernah memberikan kredensial login kamu kepada siapa pun, termasuk tim kami.'
+        },
+        'subscription-plans': {
+            title: 'Understanding subscription plans',
+            content: 'Kami menawarkan berbagai paket langganan mulai dari Gratis hingga Premium. Paket Premium memberikan akses tanpa batas ke konten eksklusif dan fitur-fitur khusus bagi penulis pro.'
+        },
+        'account-creation': {
+            title: 'How to create an account',
+            content: 'Klik tombol Daftar di pojok kanan atas, isi formulir pendaftaran dengan data yang valid, dan ikuti petunjuk verifikasi yang dikirimkan ke email kamu.'
+        }
+    },
     scrollBottom() { 
         $nextTick(() => { 
             const container = $refs.chatContainer;
@@ -14,12 +41,16 @@
         });
     } 
 }" x-init="
-        $watch('activeTab', value => { if(value === 'messages' && isViewingConversation) scrollBottom(); });
+        $watch('activeTab', value => { 
+            if(value === 'messages' && isViewingConversation) scrollBottom(); 
+            currentArticle = null;
+        });
         $watch('isViewingConversation', value => { if(value) scrollBottom(); });
         $watch('$wire.messages', () => scrollBottom());
         Livewire.on('messageSent', () => {
             activeTab = 'messages';
             isViewingConversation = true;
+            currentArticle = null;
             scrollBottom();
         });
     " class="fixed bottom-6 right-6 z-50 flex flex-col items-end font-sans">
@@ -36,7 +67,29 @@
 
         <!-- HEADERS -->
         <div class="shrink-0">
-            <template x-if="activeTab === 'home'">
+            <!-- Article Detail Header -->
+            <template x-if="currentArticle">
+                <div
+                    class="bg-white dark:bg-[#001E2B] p-5 border-b border-zinc-100 dark:border-[#1C2D38] flex justify-between items-center relative">
+                    <button @click="currentArticle = null"
+                        class="p-1 hover:bg-zinc-100 dark:hover:bg-[#1C2D38] rounded-lg transition text-zinc-400">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    <h2 class="text-sm font-bold dark:text-white text-center flex-1 tracking-tight truncate px-2"
+                        x-text="articles[currentArticle].title"></h2>
+                    <button @click="open = false"
+                        class="p-1.5 hover:bg-zinc-100 dark:hover:bg-[#1C2D38] rounded-lg transition text-zinc-400">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </template>
+
+            <template x-if="!currentArticle && activeTab === 'home'">
                 <div class="bg-gradient-to-br from-[#001E2B] to-[#00684A] p-6 text-white relative overflow-hidden">
                     <div class="absolute top-0 right-0 w-32 h-32 bg-[#00ED64]/10 rounded-full -mr-16 -mt-16 blur-3xl">
                     </div>
@@ -55,7 +108,7 @@
                 </div>
             </template>
 
-            <template x-if="activeTab === 'messages' && !isViewingConversation">
+            <template x-if="!currentArticle && activeTab === 'messages' && !isViewingConversation">
                 <div
                     class="bg-white dark:bg-[#001E2B] p-5 border-b border-zinc-100 dark:border-[#1C2D38] flex justify-between items-center relative">
                     <div class="flex-1"></div>
@@ -72,7 +125,7 @@
                 </div>
             </template>
 
-            <template x-if="activeTab === 'messages' && isViewingConversation">
+            <template x-if="!currentArticle && activeTab === 'messages' && isViewingConversation">
                 <div class="bg-[#001E2B] p-5 flex justify-between items-center text-white border-b border-[#1C2D38]">
                     <div class="flex items-center gap-3">
                         <button @click="isViewingConversation = false"
@@ -102,7 +155,7 @@
                 </div>
             </template>
 
-            <template x-if="activeTab === 'help'">
+            <template x-if="!currentArticle && activeTab === 'help'">
                 <div
                     class="bg-white dark:bg-[#001E2B] p-5 border-b border-zinc-100 dark:border-[#1C2D38] flex justify-between items-center relative">
                     <div class="flex-1"></div>
@@ -123,8 +176,31 @@
         <!-- Content Area -->
         <div class="flex-1 overflow-y-auto bg-white dark:bg-[#001E2B] custom-scrollbar relative overflow-x-hidden">
 
+            <!-- Article Detail View -->
+            <div x-show="currentArticle" x-transition:enter="transition ease-out duration-200"
+                x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0"
+                class="p-6 bg-white dark:bg-[#001E2B] min-h-full">
+                <template x-if="currentArticle">
+                    <div class="space-y-4">
+                        <h1 class="text-xl font-bold dark:text-white" x-text="articles[currentArticle].title"></h1>
+                        <div class="text-sm leading-relaxed text-zinc-600 dark:text-zinc-400"
+                            x-text="articles[currentArticle].content"></div>
+                        <div class="pt-8 border-t border-zinc-100 dark:border-[#1C2D38]">
+                            <p class="text-[10px] font-bold text-zinc-500 dark:text-zinc-400 uppercase tracking-widest">
+                                Was this article helpful?</p>
+                            <div class="flex gap-2 mt-3">
+                                <button
+                                    class="px-4 py-2 bg-white dark:bg-[#1C2D38] border border-zinc-200 dark:border-[#2A3E4A] rounded-xl text-xs font-bold text-zinc-700 dark:text-zinc-300 hover:border-[#00ED64] hover:text-[#00ED64] hover:bg-[#00ED64]/5 transition-all">Yes</button>
+                                <button
+                                    class="px-4 py-2 bg-white dark:bg-[#1C2D38] border border-zinc-200 dark:border-[#2A3E4A] rounded-xl text-xs font-bold text-zinc-700 dark:text-zinc-300 hover:border-[#00ED64] hover:text-[#00ED64] hover:bg-[#00ED64]/5 transition-all">No</button>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+
             <!-- HOME TAB -->
-            <div x-show="activeTab === 'home'" x-transition:enter="transition ease-out duration-200"
+            <div x-show="!currentArticle && activeTab === 'home'" x-transition:enter="transition ease-out duration-200"
                 x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
                 class="p-4 space-y-4 bg-zinc-50 dark:bg-[#001E2B] min-h-full">
                 <!-- Recent Message Card -->
@@ -148,13 +224,10 @@
                             <p class="text-sm font-semibold dark:text-white mt-0.5 line-clamp-1">Archipelago AI: Halo!
                                 Saya siap membantu apa pun yang...</p>
                         </div>
-                        <div class="flex items-center gap-1">
-                            <svg class="w-4 h-4 text-zinc-300 group-hover:text-[#00ED64] transition" fill="none"
-                                stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 5l7 7-7 7" />
-                            </svg>
-                        </div>
+                        <svg class="w-4 h-4 text-zinc-300 group-hover:text-[#00ED64] transition" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
                     </div>
                 </div>
 
@@ -178,7 +251,7 @@
                             d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                     <input type="text" placeholder="Search for help"
-                        class="w-full bg-white dark:bg-[#1C2D38] border-zinc-200 dark:border-[#2A3E4A] rounded-2xl py-3 pl-10 pr-4 text-sm focus:ring-2 focus:ring-[#00ED64] focus:border-transparent transition-all shadow-sm">
+                        class="w-full bg-white dark:bg-[#1C2D38] border-zinc-200 dark:border-[#2A3E4A] rounded-2xl py-3 pl-10 pr-4 text-sm text-zinc-800 dark:text-white font-bold focus:ring-2 focus:ring-[#00ED64] focus:border-transparent transition-all shadow-sm">
                 </div>
 
                 <!-- Help Articles -->
@@ -189,17 +262,21 @@
                             Articles</h3>
                     </div>
                     <div class="divide-y divide-zinc-50 dark:divide-[#2A3E4A]">
-                        @foreach(['Getting started with blog', 'How to write an article', 'Managing your profile'] as $article)
-                            <a href="#"
-                                class="flex justify-between items-center p-4 hover:bg-zinc-50 dark:hover:bg-[#2A3E4A] transition group">
-                                <span class="text-sm text-zinc-700 dark:text-zinc-300">{{ $article }}</span>
+                        <template x-for="(art, slug) in { 
+                            'getting-started': articles['getting-started'], 
+                            'how-to-write': articles['how-to-write'], 
+                            'managing-profile': articles['managing-profile'] 
+                        }" :key="slug">
+                            <button @click="currentArticle = slug"
+                                class="w-full flex justify-between items-center p-4 hover:bg-zinc-50 dark:hover:bg-[#2A3E4A] transition group text-left">
+                                <span class="text-sm text-zinc-700 dark:text-zinc-300" x-text="art.title"></span>
                                 <svg class="w-4 h-4 text-zinc-300 group-hover:text-[#00ED64] transition" fill="none"
                                     stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M9 5l7 7-7 7" />
                                 </svg>
-                            </a>
-                        @endforeach
+                            </button>
+                        </template>
                     </div>
                 </div>
 
@@ -230,12 +307,11 @@
             </div>
 
             <!-- MESSAGES TAB -->
-            <div x-show="activeTab === 'messages'" x-transition:enter="transition ease-out duration-200"
-                x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" class="min-h-full">
+            <div x-show="!currentArticle && activeTab === 'messages'"
+                x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0"
+                x-transition:enter-end="opacity-100" class="min-h-full">
                 <!-- THREADS LIST -->
-                <div x-show="!isViewingConversation"
-                    class="min-h-full pb-24">
-                    <!-- Bot Thread Item -->
+                <div x-show="!isViewingConversation" class="min-h-full pb-24">
                     <div @click="isViewingConversation = true; scrollBottom();"
                         class="flex items-center gap-4 p-5 hover:bg-zinc-50 dark:hover:bg-[#1C2D38]/50 transition cursor-pointer group">
                         <div class="relative flex-shrink-0">
@@ -251,34 +327,14 @@
                                 <h4 class="text-sm font-bold dark:text-white truncate">Archipelago AI</h4>
                                 <span class="text-xs text-zinc-400">3d</span>
                             </div>
-                            <p class="text-sm text-zinc-500 dark:text-zinc-400 line-clamp-1">Halo! Saya siap membantu
-                                apa pun yang kamu butuhkan. Silakan tanya apa saja...</p>
-                        </div>
-                        <svg class="w-5 h-5 text-zinc-300 group-hover:text-[#00ED64] transition flex-shrink-0"
-                            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                        </svg>
-                    </div>
-
-                    <!-- Human Thread Item -->
-                    <div @click="activeTab = 'messages'; isViewingConversation = true; scrollBottom();"
-                        class="flex items-center gap-4 p-5 hover:bg-zinc-50 dark:hover:bg-[#1C2D38]/50 transition cursor-pointer group">
-                        <div class="relative flex-shrink-0">
-                            <div
-                                class="w-14 h-14 bg-zinc-800 rounded-full flex items-center justify-center font-bold text-white text-lg">
-                                KW</div>
-                            <div
-                                class="absolute bottom-0 right-0 w-3.5 h-3.5 bg-zinc-400 border-2 border-white dark:border-[#001E2B] rounded-full">
-                            </div>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <div class="flex justify-between items-baseline mb-1">
-                                <h4 class="text-sm font-bold dark:text-white truncate">Kanaka Wicaksono</h4>
-                                <span class="text-xs text-zinc-400">3d</span>
-                            </div>
-                            <p class="text-sm text-zinc-500 dark:text-zinc-400 line-clamp-1 mb-2">Human expert availability is limited.</p>
-                            <button @click.stop="isViewingConversation = true; scrollBottom();" class="text-[10px] bg-[#00ED64]/10 hover:bg-[#00ED64]/20 text-[#00684A] dark:text-[#00ED64] font-bold py-1.5 px-3 rounded-lg transition border border-[#00ED64]/20 flex items-center gap-1.5 w-fit">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                            <p class="text-sm text-zinc-500 dark:text-zinc-400 line-clamp-1 mb-2">Halo! Saya siap
+                                membantu apa pun yang kamu butuhkan. Silakan tanya apa saja...</p>
+                            <button @click.stop="activeTab = 'messages'; isViewingConversation = true; scrollBottom();"
+                                class="text-[10px] bg-[#00ED64]/10 hover:bg-[#00ED64]/20 text-[#00684A] dark:text-[#00ED64] font-bold py-1.5 px-3 rounded-lg transition border border-[#00ED64]/20 flex items-center gap-1.5 w-fit">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                </svg>
                                 Use AI for faster response
                             </button>
                         </div>
@@ -288,7 +344,6 @@
                         </svg>
                     </div>
 
-                    <!-- Ask Question Button -->
                     <div class="absolute bottom-6 left-0 right-0 flex justify-center pointer-events-none">
                         <button @click="isViewingConversation = true; scrollBottom();"
                             class="pointer-events-auto bg-[#00ED64] hover:bg-[#00D056] text-[#001E2B] font-bold py-3 px-6 rounded-full shadow-lg flex items-center gap-2 transition hover:scale-105 active:scale-95">
@@ -323,7 +378,6 @@
                         </div>
                     @endforeach
 
-                    <!-- Typing indicator -->
                     <div wire:loading wire:target="sendMessage, selectSuggestion" class="flex justify-start">
                         <div
                             class="bg-white dark:bg-[#1C2D38] border border-zinc-200 dark:border-[#2A3E4A] rounded-2xl rounded-tl-none px-5 py-3 shadow-sm flex items-center gap-2">
@@ -336,9 +390,8 @@
                                     class="w-1.5 h-1.5 bg-[#00ED64] rounded-full animate-bounce [animation-delay:-0.4s]">
                                 </div>
                             </div>
-                            <span
-                                class="text-[10px] font-bold uppercase tracking-widest text-[#00ED64]">AI
-                                is thinking...</span>
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-[#00ED64]">AI is
+                                thinking...</span>
                         </div>
                     </div>
 
@@ -359,7 +412,7 @@
             </div>
 
             <!-- HELP center TAB -->
-            <div x-show="activeTab === 'help'" x-transition:enter="transition ease-out duration-200"
+            <div x-show="!currentArticle && activeTab === 'help'" x-transition:enter="transition ease-out duration-200"
                 x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
                 class="p-5 space-y-6 bg-zinc-50 dark:bg-[#001E2B] min-h-full pb-24">
                 <div class="relative group">
@@ -369,7 +422,7 @@
                             d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                     <input type="text" placeholder="Search for help"
-                        class="w-full bg-white dark:bg-[#1C2D38] border-zinc-200 dark:border-[#2A3E4A] rounded-2xl py-3 pl-10 pr-4 text-sm focus:ring-2 focus:ring-[#00ED64] focus:border-transparent transition-all shadow-sm">
+                        class="w-full bg-white dark:bg-[#1C2D38] border-zinc-200 dark:border-[#2A3E4A] rounded-2xl py-3 pl-10 pr-4 text-sm text-zinc-800 dark:text-white font-bold focus:ring-2 focus:ring-[#00ED64] focus:border-transparent transition-all shadow-sm">
                 </div>
 
                 <div class="space-y-3">
@@ -377,17 +430,18 @@
                     <div
                         class="bg-white dark:bg-[#1C2D38] rounded-2xl shadow-sm border border-zinc-100 dark:border-[#2A3E4A] overflow-hidden">
                         <div class="divide-y divide-zinc-50 dark:divide-[#2A3E4A]">
-                            @foreach(['How to create an account', 'Understanding subscription plans', 'Security best practices'] as $article)
-                                <a href="#"
-                                    class="flex justify-between items-center p-4 hover:bg-zinc-50 dark:hover:bg-[#2A3E4A] transition group">
-                                    <span class="text-sm text-zinc-700 dark:text-zinc-300 font-medium">{{ $article }}</span>
+                            <template x-for="(art, slug) in articles" :key="slug">
+                                <button @click="currentArticle = slug"
+                                    class="w-full flex justify-between items-center p-4 hover:bg-zinc-50 dark:hover:bg-[#2A3E4A] transition group text-left border-b border-zinc-50 dark:border-[#1C2D38]/50 last:border-0">
+                                    <span class="text-sm text-zinc-700 dark:text-zinc-300 font-medium"
+                                        x-text="art.title"></span>
                                     <svg class="w-4 h-4 text-zinc-300 group-hover:text-[#00ED64] transition" fill="none"
                                         stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                             d="M9 5l7 7-7 7" />
                                     </svg>
-                                </a>
-                            @endforeach
+                                </button>
+                            </template>
                         </div>
                     </div>
                 </div>
@@ -402,7 +456,8 @@
                                 <div class="text-2xl mb-2">{{ $cat['icon'] }}</div>
                                 <h4
                                     class="text-sm font-bold dark:text-white group-hover:text-[#00ED64] transition text-zinc-800">
-                                    {{ $cat['name'] }}</h4>
+                                    {{ $cat['name'] }}
+                                </h4>
                                 <p class="text-[10px] text-zinc-400 font-medium mt-1">{{ $cat['count'] }} articles</p>
                             </div>
                         @endforeach
@@ -412,14 +467,16 @@
         </div>
 
         <!-- Sticky Bottom Input Area -->
-        <div x-show="activeTab === 'messages' && isViewingConversation"
+        <div x-show="!currentArticle && activeTab === 'messages' && isViewingConversation"
             x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4"
             x-transition:enter-end="opacity-100 translate-y-0"
             class="p-4 bg-white dark:bg-[#001E2B] border-t border-zinc-100 dark:border-[#1C2D38] absolute bottom-[64px] left-0 right-0 z-20">
             @auth
                 @if($isAdmin || $remainingMessages > 0)
-                    <form wire:submit.prevent="sendMessage" class="relative group">
-                        <textarea wire:model="userMessage" rows="1" @keydown.enter.prevent="$wire.sendMessage()"
+                    <form @submit.prevent="$wire.sendMessage($wire.userMessage); $wire.userMessage = '';"
+                        class="relative group">
+                        <textarea wire:model="userMessage" rows="1"
+                            @keydown.enter.prevent="$wire.sendMessage($wire.userMessage); $wire.userMessage = '';"
                             placeholder="Send a message..."
                             class="w-full bg-zinc-100 dark:bg-[#1C2D38] border-0 rounded-xl pl-4 pr-12 py-3 text-sm focus:ring-2 focus:ring-[#00ED64] dark:text-white transition-all resize-none overflow-hidden"></textarea>
                         <button type="submit"
@@ -442,7 +499,7 @@
         <!-- Sticky Bottom Navigation -->
         <div
             class="bg-white dark:bg-[#001E2B] border-t border-zinc-100 dark:border-[#1C2D38] flex justify-around p-2 shrink-0 relative z-30">
-            <button @click="activeTab = 'home'; isViewingConversation = false;"
+            <button @click="activeTab = 'home'; isViewingConversation = false; currentArticle = null;"
                 class="flex flex-col items-center gap-1 p-2 min-w-[60px] transition-colors"
                 :class="activeTab === 'home' ? 'text-[#00ED64]' : 'text-zinc-300 hover:text-zinc-600'">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
@@ -451,7 +508,7 @@
                 </svg>
                 <span class="text-[10px] font-bold">Home</span>
             </button>
-            <button @click="activeTab = 'messages'; isViewingConversation = false;"
+            <button @click="activeTab = 'messages'; isViewingConversation = false; currentArticle = null;"
                 class="flex flex-col items-center gap-1 p-2 min-w-[60px] transition-colors"
                 :class="activeTab === 'messages' ? 'text-[#00ED64]' : 'text-zinc-300 hover:text-zinc-600'">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
@@ -461,7 +518,7 @@
                 </svg>
                 <span class="text-[10px] font-bold">Messages</span>
             </button>
-            <button @click="activeTab = 'help'; isViewingConversation = false;"
+            <button @click="activeTab = 'help'; isViewingConversation = false; currentArticle = null;"
                 class="flex flex-col items-center gap-1 p-2 min-w-[60px] transition-colors"
                 :class="activeTab === 'help' ? 'text-[#00ED64]' : 'text-zinc-300 hover:text-zinc-600'">
                 <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">

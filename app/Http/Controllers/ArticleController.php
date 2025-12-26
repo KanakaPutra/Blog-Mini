@@ -249,6 +249,11 @@ class ArticleController extends Controller
             $action = 'liked';
         }
 
+        // Trigger notification if it's a like and not from the author
+        if ($action === 'liked' && $article->user_id !== $userId) {
+            $article->user->notify(new \App\Notifications\ArticleLiked(auth()->user(), $article));
+        }
+
         if ($request->wantsJson()) {
             return response()->json([
                 'success' => true,
