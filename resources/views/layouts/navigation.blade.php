@@ -1,3 +1,4 @@
+@php /** @var \App\Models\User $authenticatedUser */ $authenticatedUser = auth()->user(); @endphp
 <nav x-data="navComponent()" class="bg-white border-b border-gray-100" x-cloak>
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -22,7 +23,7 @@
                             <div class="relative" @mouseenter="openIndex = true" @mouseleave="openIndex = false">
                                 <button
                                     class="inline-flex items-center px-3 py-2 border-b-2 text-sm font-medium focus:outline-none transition ease-in-out duration-150
-                                                                        {{ request()->routeIs('category.show') ? 'border-blue-500 text-gray-900' : 'border-transparent text-gray-700 hover:text-gray-900 hover:border-gray-300' }}">
+                                                                                {{ request()->routeIs('category.show') ? 'border-blue-500 text-gray-900' : 'border-transparent text-gray-700 hover:text-gray-900 hover:border-gray-300' }}">
                                     {{ __('Index') }}
                                     <svg :class="{ 'rotate-180': openIndex }"
                                         class="ms-1 h-4 w-4 transform transition-transform duration-200"
@@ -41,7 +42,7 @@
                                         @foreach ($categories as $category)
                                             <a href="{{ route('category.show', $category->id) }}"
                                                 class="block px-4 py-2 text-sm rounded-sm transition-colors duration-150
-                                                                                            {{ request()->is('category/' . $category->id) ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }}">
+                                                                                                        {{ request()->is('category/' . $category->id) ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }}">
                                                 {{ $category->name }}
                                             </a>
                                         @endforeach
@@ -63,7 +64,7 @@
                     <div class="relative ms-3" @mouseenter="openProfile = true" @mouseleave="openProfile = false">
                         <button
                             class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
-                            <div>{{ Auth::user()->name }}</div>
+                            <div>{{ $authenticatedUser->name }}</div>
                             <svg :class="{ 'rotate-180': openProfile }"
                                 class="ms-1 h-4 w-4 transform transition-transform duration-200"
                                 xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
@@ -141,7 +142,7 @@
                         @foreach ($categories as $category)
                             <a href="{{ route('category.show', $category->id) }}"
                                 class="block px-3 py-1.5 text-sm rounded-md 
-                                                                                                   {{ request()->is('category/' . $category->id) ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-gray-700 hover:bg-gray-100' }}">
+                                                                                                               {{ request()->is('category/' . $category->id) ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-gray-700 hover:bg-gray-100' }}">
                                 {{ $category->name }}
                             </a>
                         @endforeach
@@ -156,8 +157,8 @@
         @if (Auth::check())
             <div class="pt-4 pb-1 border-t border-gray-200">
                 <div class="px-4">
-                    <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
-                    <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
+                    <div class="font-medium text-base text-gray-800">{{ $authenticatedUser->name }}</div>
+                    <div class="font-medium text-sm text-gray-500">{{ $authenticatedUser->email }}</div>
                 </div>
 
                 <div class="mt-3 space-y-1">

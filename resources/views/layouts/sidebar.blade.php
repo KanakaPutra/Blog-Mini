@@ -1,3 +1,4 @@
+@php /** @var \App\Models\User $authenticatedUser */ $authenticatedUser = auth()->user(); @endphp
 <div :class="[
         sidebarOpen ? 'md:w-72' : 'md:w-[5.5rem]',
         mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
@@ -262,8 +263,8 @@
             <div
                 class="bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden py-1.5 ring-1 ring-gray-900/5">
                 <div class="px-4 py-3 bg-gray-50 border-b border-gray-100">
-                    <p class="text-sm font-semibold text-gray-900 truncate">{{ Auth::user()->name }}</p>
-                    <p class="text-xs text-gray-500 truncate">{{ Auth::user()->email }}</p>
+                    <p class="text-sm font-semibold text-gray-900 truncate">{{ $authenticatedUser->name }}</p>
+                    <p class="text-xs text-gray-500 truncate">{{ $authenticatedUser->email }}</p>
                 </div>
 
                 <a href="{{ route('profile.edit') }}"
@@ -319,7 +320,7 @@
                 <!-- User Avatar / Initials (Always Visible) -->
                 <div
                     class="flex-shrink-0 w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold shadow-md ring-2 ring-white">
-                    {{ substr(Auth::user()->name, 0, 1) }}
+                    {{ substr($authenticatedUser->name, 0, 1) }}
                 </div>
                 <div class="ml-3 text-left whitespace-nowrap overflow-hidden" x-show="sidebarOpen || mobileOpen" x-cloak
                     x-transition:enter="delay-100 transition ease-out duration-300"
@@ -327,8 +328,8 @@
                     x-transition:enter-end="opacity-100 translate-x-0"
                     x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100"
                     x-transition:leave-end="opacity-0">
-                    <div class="font-bold text-sm text-gray-800 leading-tight">{{ Auth::user()->name }}</div>
-                    <div class="font-normal text-xs text-gray-500 truncate max-w-[9rem]">{{ Auth::user()->email }}</div>
+                    <div class="font-bold text-sm text-gray-800 leading-tight">{{ $authenticatedUser->name }}</div>
+                    <div class="font-normal text-xs text-gray-500 truncate max-w-[9rem]">{{ $authenticatedUser->email }}</div>
                 </div>
             </div>
             <svg :class="{ 'rotate-180': openProfile }" x-show="sidebarOpen || mobileOpen"
