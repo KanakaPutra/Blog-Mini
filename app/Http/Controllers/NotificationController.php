@@ -29,4 +29,18 @@ class NotificationController extends Controller
         auth()->user()->unreadNotifications->markAsRead();
         return back()->with('success', 'Semua notifikasi ditandai sebagai dibaca.');
     }
+
+    public function readAndRedirect($id)
+    {
+        $notification = auth()->user()->notifications()->findOrFail($id);
+        $notification->markAsRead();
+
+        $articleId = $notification->data['article_id'] ?? null;
+
+        if ($articleId) {
+            return redirect()->route('articles.show', $articleId);
+        }
+
+        return redirect()->route('notifications.index');
+    }
 }

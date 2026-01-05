@@ -24,8 +24,8 @@
                     <div class="space-y-4">
                         @forelse($notifications as $notification)
                             <div
-                                class="p-4 border rounded-lg {{ $notification->read_at ? 'bg-gray-50' : 'bg-white border-blue-200' }} flex justify-between items-center">
-                                <div>
+                                class="p-4 border rounded-lg {{ $notification->read_at ? 'bg-gray-50' : 'bg-white border-blue-200' }} flex justify-between items-center hover:shadow-sm transition-shadow duration-150">
+                                <a href="{{ route('notifications.redirect', $notification->id) }}" class="flex-1">
                                     <p
                                         class="text-sm font-medium {{ $notification->read_at ? 'text-gray-600' : 'text-gray-900' }}">
                                         {{ $notification->data['message'] }}
@@ -33,12 +33,13 @@
                                     <p class="text-xs text-gray-500 mt-1">
                                         {{ $notification->created_at->diffForHumans() }}
                                     </p>
-                                </div>
+                                </a>
                                 @if(!$notification->read_at)
-                                    <form action="{{ route('notifications.markAsRead', $notification->id) }}" method="POST">
+                                    <form action="{{ route('notifications.markAsRead', $notification->id) }}" method="POST"
+                                        class="ml-4">
                                         @csrf
                                         <button type="submit"
-                                            class="text-xs text-blue-600 hover:text-blue-800 font-semibold uppercase">
+                                            class="text-xs text-blue-600 hover:text-blue-800 font-semibold uppercase whitespace-nowrap">
                                             {{ __('Tandai Dibaca') }}
                                         </button>
                                     </form>

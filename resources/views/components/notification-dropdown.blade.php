@@ -34,11 +34,11 @@
             </div>
             <div class="max-h-64 overflow-y-auto">
                 @forelse(auth()->user()->unreadNotifications->take(5) as $notification)
-                    <div
-                        class="px-4 py-3 hover:bg-gray-50 transition-colors duration-150 border-b border-gray-50 last:border-0">
+                    <a href="{{ route('notifications.redirect', $notification->id) }}"
+                        class="block px-4 py-3 hover:bg-gray-50 transition-colors duration-150 border-b border-gray-50 last:border-0">
                         <p class="text-sm text-gray-800">{{ $notification->data['message'] }}</p>
                         <p class="text-xs text-gray-500 mt-1">{{ $notification->created_at->diffForHumans() }}</p>
-                    </div>
+                    </a>
                 @empty
                     <div class="px-4 py-3 text-sm text-gray-500 text-center">
                         {{ __('No unread notifications') }}
