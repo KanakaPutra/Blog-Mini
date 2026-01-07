@@ -18,6 +18,11 @@ class CommentLikeController extends Controller
         } else {
             $comment->likes()->create(['user_id' => $user->id]);
             $liked = true;
+
+            // Trigger notification if liker is not the comment author
+            if ($comment->user_id !== $user->id) {
+                $comment->user->notify(new \App\Notifications\CommentLiked($user, $comment, $comment->article));
+            }
         }
 
         return response()->json([

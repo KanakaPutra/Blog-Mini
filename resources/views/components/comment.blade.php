@@ -182,7 +182,7 @@
             this.isReporting = false;
         });
     }
-}" x-show="!isDeleted" class="group mb-3">
+}" x-show="!isDeleted" id="comment-{{ $comment->id }}" @expand-replies.window="if ($el.contains(document.querySelector(window.location.hash))) showReplies = true" class="group mb-3">
 
     {{-- Main Comment Row --}}
     <div class="flex gap-3">

@@ -24,6 +24,24 @@ class CommentController extends Controller
             'parent_id' => $request->parent_id, // simpan parent
         ]);
 
+        $article = $comment->article;
+        $commenter = auth()->user();
+
+        // 1. Notify article author for ANY comment/reply (if not by the author themselves)
+        if ($article->user_id !== $commenter->id) {
+            $article->user->notify(new \App\Notifications\ArticleCommented($commenter, $comment, $article));
+        }
+
+        // 2. Notify parent comment author if it's a reply (if not by the parent author themselves)
+        // AND if the parent author is NOT the article author (to avoid double notification)
+        if (
+            $comment->parent_id &&
+            $comment->parent->user_id !== $commenter->id &&
+            $comment->parent->user_id !== $article->user_id
+        ) {
+            $comment->parent->user->notify(new \App\Notifications\ArticleCommented($commenter, $comment, $article));
+        }
+
         if ($request->wantsJson()) {
             // Load relationships needed for the view
             $comment->load('user', 'replies');

@@ -36,9 +36,14 @@ class NotificationController extends Controller
         $notification->markAsRead();
 
         $articleId = $notification->data['article_id'] ?? null;
+        $commentId = $notification->data['comment_id'] ?? null;
 
         if ($articleId) {
-            return redirect()->route('articles.show', $articleId);
+            $url = route('articles.show', $articleId);
+            if ($commentId) {
+                $url .= '#comment-' . $commentId;
+            }
+            return redirect($url);
         }
 
         return redirect()->route('notifications.index');
