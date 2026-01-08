@@ -181,8 +181,42 @@
         .finally(() => {
             this.isReporting = false;
         });
+    },
+    // PIN functionality
+    isPinned: {{ $comment->is_pinned ? 'true' : 'false' }},
+    isPinning: false,
+    togglePin() {
+        if (this.isPinning) return;
+        this.isPinning = true;
+        
+        fetch('/comments/{{ $comment->id }}/pin', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            this.isPinned = data.is_pinned;
+            if (this.isPinned) {
+               // Optional: trigger reload or sorting update if needed
+               // For now, just refresh the page to show sorted order if user wants, 
+               // but we can just update the UI state.
+               location.reload(); 
+            } else {
+               this.isPinned = false;
+            }
+        })
+        .catch(error => {
+            alert('Failed to pin/unpin comment.');
+        })
+        .finally(() => {
+            this.isPinning = false;
+        });
     }
-}" x-show="!isDeleted" id="comment-{{ $comment->id }}" @expand-replies.window="if ($el.contains(document.querySelector(window.location.hash))) showReplies = true" class="group mb-3">
+}" x-show="!isDeleted" id="comment-{{ $comment->id }}" @expand-replies.window="if ($el.contains(document.querySelector(window.location.hash))) showReplies = true" class="group mb-3 transition-all duration-300" :class="isPinned ? 'bg-blue-50/50 -mx-4 px-4 py-3 rounded-xl' : ''">
 
     {{-- Main Comment Row --}}
     <div class="flex gap-3">
@@ -214,6 +248,16 @@
                 <span class="text-xs text-gray-500">
                     {{ $comment->created_at->diffForHumans() }}
                 </span>
+
+                {{-- Pinned Badge --}}
+                <template x-if="isPinned">
+                    <div class="flex items-center gap-1 bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
+                        </svg>
+                        Pinned
+                    </div>
+                </template>
             </div>
 
             {{-- Action Menu (Three Dots) --}}
@@ -256,6 +300,16 @@
                             <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
                         </svg>
                         Report
+                    </button>
+                    @endif
+
+                    {{-- Pin Action for Article Author --}}
+                    @if(auth()->id() === $comment->article->user_id && $depth === 0)
+                    <button @click="open = false; togglePin()" class="w-full text-left px-4 py-2.5 text-xs font-medium text-blue-700 hover:bg-blue-50 border-t border-gray-50 flex items-center gap-2 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" :class="isPinned ? 'text-blue-600' : 'text-gray-400'" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
+                        </svg>
+                        <span x-text="isPinned ? 'Unpin Comment' : 'Pin Comment'"></span>
                     </button>
                     @endif
                 </div>

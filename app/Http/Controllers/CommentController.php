@@ -105,4 +105,27 @@ class CommentController extends Controller
             'message' => 'Comment deleted successfully'
         ]);
     }
+
+    public function togglePin(Comment $comment)
+    {
+        $article = $comment->article;
+
+        // Cek apakah user adalah penulis artikel
+        if (Auth::id() !== $article->user_id) {
+            return response()->json(['message' => 'Unauthorized. Only the article author can pin comments.'], 403);
+        }
+
+        // Jika mau unpin
+        if ($comment->is_pinned) {
+            $comment->update(['is_pinned' => false]);
+            return response()->json(['message' => 'Comment unpinned', 'is_pinned' => false]);
+        }
+
+        // Jika mau pin, unpin komentar lain di artikel yang sama dulu (opsional, tapi biasanya cuma 1 yang di-pin)
+        Comment::where('article_id', $article->id)->where('is_pinned', true)->update(['is_pinned' => false]);
+
+        $comment->update(['is_pinned' => true]);
+
+        return response()->json(['message' => 'Comment pinned successfully', 'is_pinned' => true]);
+    }
 }

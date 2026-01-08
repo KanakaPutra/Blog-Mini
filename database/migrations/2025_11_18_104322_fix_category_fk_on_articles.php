@@ -14,7 +14,9 @@ return new class extends Migration {
 
             // 1. Hapus foreign key lama
             // Kita harus drop foreign key dulu, baru nanti bisa ubah kolom
-            $table->dropForeign('articles_category_id_foreign');
+            if (config('database.default') !== 'sqlite') {
+                $table->dropForeign('articles_category_id_foreign');
+            }
 
             if (Schema::hasIndex('articles', 'articles_category_id_foreign')) {
                 $table->dropIndex('articles_category_id_foreign');

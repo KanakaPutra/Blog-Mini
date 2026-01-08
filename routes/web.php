@@ -143,6 +143,7 @@ Route::middleware(['auth'])->group(function () {
     // Comment Like & Report
     Route::post('/comments/{comment}/like', [\App\Http\Controllers\CommentLikeController::class, 'toggle'])->name('comments.like');
     Route::post('/comments/{comment}/report', [\App\Http\Controllers\CommentReportController::class, 'store'])->name('comments.report');
+    Route::post('/comments/{comment}/pin', [\App\Http\Controllers\CommentController::class, 'togglePin'])->name('comments.pin');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

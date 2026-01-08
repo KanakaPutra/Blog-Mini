@@ -13,7 +13,12 @@ class Comment extends Model
         'user_id',
         'article_id',
         'content',
-        'parent_id'
+        'parent_id',
+        'is_pinned'
+    ];
+
+    protected $casts = [
+        'is_pinned' => 'boolean',
     ];
 
     // Relasi ke user
