@@ -64,6 +64,12 @@ class Article extends Model
         return $this->hasMany(ArticleReport::class);
     }
 
+    // BOOKMARK
+    public function bookmarks()
+    {
+        return $this->hasMany(Bookmark::class);
+    }
+
     // ==========================
     //         HELPERS
     // ==========================
@@ -121,6 +127,15 @@ class Article extends Model
     {
         return $user
             ? $this->reports()
+                ->where('user_id', $user->id)
+                ->exists()
+            : false;
+    }
+
+    public function isBookmarkedBy($user): bool
+    {
+        return $user
+            ? $this->bookmarks()
                 ->where('user_id', $user->id)
                 ->exists()
             : false;

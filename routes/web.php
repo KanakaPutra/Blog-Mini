@@ -5,6 +5,10 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SuperAdminController;
+use App\Http\Controllers\BookmarkController;
+use App\Http\Controllers\CommentLikeController;
+use App\Http\Controllers\CommentReportController;
+use App\Http\Controllers\NotificationController;
 use App\Models\Article;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Route;
@@ -141,9 +145,9 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
 
     // Comment Like & Report
-    Route::post('/comments/{comment}/like', [\App\Http\Controllers\CommentLikeController::class, 'toggle'])->name('comments.like');
-    Route::post('/comments/{comment}/report', [\App\Http\Controllers\CommentReportController::class, 'store'])->name('comments.report');
-    Route::post('/comments/{comment}/pin', [\App\Http\Controllers\CommentController::class, 'togglePin'])->name('comments.pin');
+    Route::post('/comments/{comment}/like', [CommentLikeController::class, 'toggle'])->name('comments.like');
+    Route::post('/comments/{comment}/report', [CommentReportController::class, 'store'])->name('comments.report');
+    Route::post('/comments/{comment}/pin', [CommentController::class, 'togglePin'])->name('comments.pin');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -165,10 +169,14 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/history-like', [ArticleController::class, 'history'])->name('history.like');
 
     // Notifications
-    Route::get('/notifications', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
-    Route::post('/notifications/{id}/mark-as-read', [\App\Http\Controllers\NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
-    Route::get('/notifications/{id}/redirect', [\App\Http\Controllers\NotificationController::class, 'readAndRedirect'])->name('notifications.redirect');
-    Route::post('/notifications/mark-all-as-read', [\App\Http\Controllers\NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{id}/mark-as-read', [NotificationController::class, 'markAsRead'])->name('notifications.markAsRead');
+    Route::get('/notifications/{id}/redirect', [NotificationController::class, 'readAndRedirect'])->name('notifications.redirect');
+    Route::post('/notifications/mark-all-as-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.markAllAsRead');
+
+    // Bookmarks
+    Route::get('/bookmarks', [BookmarkController::class, 'index'])->name('bookmarks.index');
+    Route::post('/articles/{article}/bookmark', [BookmarkController::class, 'toggle'])->name('articles.bookmark');
 });
 
 

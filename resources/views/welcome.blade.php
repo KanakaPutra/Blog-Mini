@@ -138,24 +138,59 @@
                         </p>
 
                         <!-- LIKE + Lihat Selengkapnya -->
-                        <div class="mt-4 border-t pt-3 flex items-center justify-between">
+                        <div class="mt-4 border-t pt-3 flex items-center justify-between" x-data="{
+                                    bookmarked: @auth {{ $article->isBookmarkedBy(auth()->user()) ? 'true' : 'false' }} @else false @endauth,
+                                    toggleBookmark() {
+                                        @auth
+                                            fetch('{{ route('articles.bookmark', $article->id) }}', {
+                                                method: 'POST',
+                                                headers: {
+                                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                                    'Accept': 'application/json',
+                                                    'X-Requested-With': 'XMLHttpRequest'
+                                                }
+                                            })
+                                            .then(res => res.json())
+                                            .then(data => {
+                                                if (data.success) {
+                                                    this.bookmarked = data.is_bookmarked;
+                                                }
+                                            })
+                                            .catch(err => console.error(err));
+                                        @else
+                                            window.location.href = '{{ route('login') }}';
+                                        @endauth
+                                    }
+                                }">
 
                             <a href="{{ route('articles.show', $article->id) }}"
-                                class="text-blue-600 hover:underline text-sm">
+                                class="text-blue-600 hover:underline text-sm font-medium">
                                 Lihat Selengkapnya
                             </a>
 
-                            <!-- Tampilkan jumlah LIKE saja -->
-                            <div class="flex items-center gap-1 text-sm text-gray-700">
-                                <svg xmlns="http://www.w3.org/2000/svg"
-                                    class="h-4 w-4 stroke-current {{ auth()->check() && $article->isLikedBy(auth()->user()) ? 'text-red-500 fill-current' : 'text-gray-400 fill-none' }}"
-                                    viewBox="0 0 24 24" stroke-width="2">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                </svg>
-                                <span class="font-semibold">{{ $article->totalLikes() }}</span>
-                            </div>
+                            <div class="flex items-center gap-3">
+                                <!-- BOOKMARK -->
+                                <button @click="toggleBookmark()" class="transition-colors duration-200"
+                                    :class="bookmarked ? 'text-blue-500' : 'text-gray-400 hover:text-blue-500'">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
+                                        :class="bookmarked ? 'fill-current' : 'fill-none'" viewBox="0 0 24 24"
+                                        stroke="currentColor" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                                    </svg>
+                                </button>
 
+                                <!-- Tampilkan jumlah LIKE saja -->
+                                <div class="flex items-center gap-1 text-sm text-gray-700">
+                                    <svg xmlns="http://www.w3.org/2000/svg"
+                                        class="h-4 w-4 stroke-current {{ auth()->check() && $article->isLikedBy(auth()->user()) ? 'text-red-500 fill-current' : 'text-gray-400 fill-none' }}"
+                                        viewBox="0 0 24 24" stroke-width="2">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                    </svg>
+                                    <span class="font-semibold">{{ $article->totalLikes() }}</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

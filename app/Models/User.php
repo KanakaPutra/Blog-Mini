@@ -64,6 +64,12 @@ class User extends Authenticatable
             ->withPivot('created_at');
     }
 
+    public function bookmarkedArticles()
+    {
+        return $this->belongsToMany(Article::class, 'bookmarks', 'user_id', 'article_id')
+            ->withTimestamps();
+    }
+
     // ✅ Helper method: cek apakah user dibanned
     public function isBanned(): bool
     {
