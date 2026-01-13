@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Auth;
 */
 Route::get('/', function () {
     $articles = Article::with(['category', 'user'])
+        ->published()
         ->where('suspended', false)
         ->latest()
         ->get();
@@ -106,6 +107,7 @@ Route::get('/dashboard', function () {
     }
 
     $articles = Article::with(['category', 'user', 'comments'])
+        ->published()
         ->where('suspended', false)
         ->latest()
         ->get();

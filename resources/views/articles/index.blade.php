@@ -22,17 +22,25 @@
             @if(auth()->user()->is_admin == 2)
                 <div class="mb-8 flex items-center gap-3">
 
-                    <!-- ALL ARTIKEL -->
+                    <!-- ALL ARTIKEL (PUBLISHED ONLY) -->
                     <a href="{{ route('articles.index') }}" class="px-4 py-2 rounded-md text-sm font-medium
-                                        {{ request('filter') == 'mine'
-                    ? 'bg-gray-200 text-gray-700'
-                    : 'bg-blue-600 text-white hover:bg-blue-700' }}">
-                        Semua Artikel
+                                                 {{ !request('filter')
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+                        Artikel Live
+                    </a>
+
+                    <!-- SEMUA (TERMASUK DRAFT) -->
+                    <a href="{{ route('articles.index', ['filter' => 'all']) }}" class="px-4 py-2 rounded-md text-sm font-medium
+                                                 {{ request('filter') == 'all'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+                        Semua (Draft/Terjadwal)
                     </a>
 
                     <!-- ARTIKEL SAYA -->
                     <a href="{{ route('articles.index', ['filter' => 'mine']) }}" class="px-4 py-2 rounded-md text-sm font-medium
-                                        {{ request('filter') == 'mine'
+                                                 {{ request('filter') == 'mine'
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
                         Artikel Saya
@@ -106,8 +114,25 @@
                         </p>
 
                         <p class="text-xs text-gray-400 mb-3">
-                            Dipublikasikan pada {{ $article->created_at->translatedFormat('d F Y') }}
+                            Dipublikasikan pada
+                            {{ $article->published_at ? $article->published_at->translatedFormat('d F Y') : $article->created_at->translatedFormat('d F Y') }}
                         </p>
+
+                        @if($article->status === 'draft')
+                            <div class="mb-3">
+                                <span
+                                    class="bg-gray-100 text-gray-600 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider border border-gray-200">
+                                    Draft
+                                </span>
+                            </div>
+                        @elseif($article->status === 'published' && $article->published_at && $article->published_at->isFuture())
+                            <div class="mb-3">
+                                <span
+                                    class="bg-blue-50 text-blue-600 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider border border-blue-100">
+                                    Scheduled: {{ $article->published_at->translatedFormat('d M, H:i') }}
+                                </span>
+                            </div>
+                        @endif
 
                         <p class="text-gray-700 text-sm flex-grow leading-relaxed">
                             {{ Str::limit(strip_tags($article->content), 120, '...') }}

@@ -89,7 +89,7 @@
                                 </a>
                                 <a href="{{ route('bookmarks.index') }}"
                                     class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150">
-                                    {{ __('Simpanan Saya') }}
+                                    {{ __('Bookmarks') }}
                                 </a>
                                 <a href="{{ route('notifications.index') }}"
                                     class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-150">
@@ -175,7 +175,7 @@
                     </x-responsive-nav-link>
 
                     <x-responsive-nav-link :href="route('bookmarks.index')">
-                        {{ __('Simpanan Saya') }}
+                        {{ __('Bookmarks') }}
                     </x-responsive-nav-link>
 
                     <form method="POST" action="{{ route('logout') }}">

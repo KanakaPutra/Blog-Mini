@@ -16,6 +16,13 @@ class Article extends Model
         'content',
         'thumbnail',
         'suspended',
+        'status',
+        'published_at',
+    ];
+
+    protected $casts = [
+        'published_at' => 'datetime',
+        'suspended' => 'boolean',
     ];
 
     protected $appends = ['thumbnail_url'];
@@ -139,5 +146,23 @@ class Article extends Model
                 ->where('user_id', $user->id)
                 ->exists()
             : false;
+    }
+
+    // ==========================
+    //         SCOPES
+    // ==========================
+
+    public function scopePublished($query)
+    {
+        return $query->where('status', 'published')
+            ->where(function ($q) {
+                $q->whereNull('published_at')
+                    ->orWhere('published_at', '<=', now());
+            });
+    }
+
+    public function isPublished(): bool
+    {
+        return $this->status === 'published' && ($this->published_at === null || $this->published_at->isPast());
     }
 }

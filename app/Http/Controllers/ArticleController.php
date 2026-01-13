@@ -24,15 +24,16 @@ class ArticleController extends Controller
                     ->latest()
                     ->get();
             } else {
-                // Super admin sees all articles EXCEPT suspended ones in the main feed
-                // But if they want to see suspended ones, they should probably go to reports or a specific filter
-                // For now, let's hide suspended articles from the main feed even for super admin, 
-                // unless we want to add a specific filter for them.
-                // Requirement says: "berita bakal hilang dari index... cuma muncul di list artikel nya"
-                $articles = Article::with(['category', 'user'])
-                    ->where('suspended', false)
-                    ->latest()
-                    ->get();
+                $query = Article::with(['category', 'user'])
+                    ->where('suspended', false);
+
+                // Jika filter bukan 'all', tampilkan hanya yang sudah publish secara default
+                // agar admin tidak bingung mana yang sudah live dan mana yang belum.
+                if ($request->filter !== 'all') {
+                    $query->published();
+                }
+
+                $articles = $query->latest()->get();
             }
 
             return view('articles.index', compact('articles'));
@@ -48,8 +49,9 @@ class ArticleController extends Controller
             return view('articles.index', compact('articles'));
         }
 
-        // USER biasa
+        // USER biasa (Public View)
         $articles = Article::with(['category', 'user'])
+            ->published()
             ->where('suspended', false)
             ->latest()
             ->get();
@@ -77,6 +79,8 @@ class ArticleController extends Controller
             'content' => 'required',
             'category_id' => 'nullable|exists:categories,id',
             'thumbnail' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'status' => 'required|in:draft,published',
+            'published_at' => 'nullable|date',
         ]);
 
         $thumbnailPath = null;
@@ -110,9 +114,14 @@ class ArticleController extends Controller
             }
         }
 
-        $data = $request->only('title', 'content', 'category_id');
+        $data = $request->only('title', 'content', 'category_id', 'status', 'published_at');
         $data['user_id'] = Auth::id();
         $data['thumbnail'] = $thumbnailPath;
+
+        // Jika status published tapi published_at kosong, set ke sekarang
+        if ($data['status'] === 'published' && empty($data['published_at'])) {
+            $data['published_at'] = now();
+        }
 
         Article::create($data);
 
@@ -142,9 +151,16 @@ class ArticleController extends Controller
                 'content' => 'required',
                 'category_id' => 'nullable|exists:categories,id',
                 'thumbnail' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+                'status' => 'required|in:draft,published',
+                'published_at' => 'nullable|date',
             ]);
 
-            $data = $request->only('title', 'content', 'category_id');
+            $data = $request->only('title', 'content', 'category_id', 'status', 'published_at');
+
+            // Jika status published tapi published_at kosong, set ke sekarang
+            if ($data['status'] === 'published' && empty($data['published_at'])) {
+                $data['published_at'] = now();
+            }
 
             if ($request->hasFile('thumbnail')) {
                 $file = $request->file('thumbnail');
@@ -198,6 +214,16 @@ class ArticleController extends Controller
 
     public function show(Article $article)
     {
+        $user = Auth::user();
+
+        // Visibility check:
+        // Jika belum published, hanya author atau super admin (is_admin == 2) yang bisa lihat.
+        if (!$article->isPublished()) {
+            if (!$user || ($user->id !== $article->user_id && $user->is_admin != 2)) {
+                abort(403, 'Artikel ini belum dipublikasikan atau masih berupa draft.');
+            }
+        }
+
         $article->load(['category', 'user', 'comments.user']);
         return view('articles.show', compact('article'));
     }

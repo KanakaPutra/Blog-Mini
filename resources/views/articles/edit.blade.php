@@ -39,8 +39,29 @@
             <textarea name="content" rows="5"
                 class="w-full border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md p-2 text-sm">{{ $article->content }}</textarea>
 
-            <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm transition">
-                Perbarui
+            <!-- Status & Schedule -->
+            <div x-data="{ status: '{{ old('status', $article->status) }}' }" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <select name="status" x-model="status"
+                        class="w-full border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md p-2 text-sm">
+                        <option value="published">Publish Now / Scheduled</option>
+                        <option value="draft">Draft</option>
+                    </select>
+                </div>
+
+                <div x-show="status === 'published'">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Jadwalkan Publikasi (Opsional)</label>
+                    <input type="datetime-local" name="published_at"
+                        value="{{ old('published_at', $article->published_at?->format('Y-m-d\TH:i')) }}"
+                        class="w-full border-gray-300 focus:border-blue-500 focus:ring-blue-500 rounded-md p-2 text-sm">
+                    <p class="text-xs text-gray-500 mt-1">Kosongkan jika ingin langsung dipublikasikan.</p>
+                </div>
+            </div>
+
+            <button
+                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md font-medium text-sm transition">
+                Perbarui Artikel
             </button>
         </form>
     </div>
