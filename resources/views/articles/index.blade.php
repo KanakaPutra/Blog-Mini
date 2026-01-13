@@ -17,34 +17,36 @@
             @endauth
         </div>
 
-        <!-- FILTER UNTUK SUPER ADMIN -->
+        <!-- FILTER UNTUK ADMIN & SUPER ADMIN -->
         @auth
-            @if(auth()->user()->is_admin == 2)
+            @if(auth()->user()->is_admin >= 1)
                 <div class="mb-8 flex items-center gap-3">
 
                     <!-- ALL ARTIKEL (PUBLISHED ONLY) -->
                     <a href="{{ route('articles.index') }}" class="px-4 py-2 rounded-md text-sm font-medium
-                                                 {{ !request('filter')
+                                                                 {{ !request('filter')
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
                         Artikel Live
                     </a>
 
-                    <!-- SEMUA (TERMASUK DRAFT) -->
-                    <a href="{{ route('articles.index', ['filter' => 'all']) }}" class="px-4 py-2 rounded-md text-sm font-medium
-                                                 {{ request('filter') == 'all'
+                    <!-- PENDING (DRAFT & SCHEDULED) -->
+                    <a href="{{ route('articles.index', ['filter' => 'pending']) }}" class="px-4 py-2 rounded-md text-sm font-medium
+                                                                 {{ request('filter') == 'pending'
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
-                        Semua (Draft/Terjadwal)
+                        Draft & Terjadwal
                     </a>
 
-                    <!-- ARTIKEL SAYA -->
-                    <a href="{{ route('articles.index', ['filter' => 'mine']) }}" class="px-4 py-2 rounded-md text-sm font-medium
-                                                 {{ request('filter') == 'mine'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
-                        Artikel Saya
-                    </a>
+                    <!-- ARTIKEL SAYA (Hanya untuk Super Admin agar bisa filter miliknya sendiri) -->
+                    @if(auth()->user()->is_admin == 2)
+                        <a href="{{ route('articles.index', ['filter' => 'mine']) }}" class="px-4 py-2 rounded-md text-sm font-medium
+                                                        {{ request('filter') == 'mine'
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-200 text-gray-700 hover:bg-gray-300' }}">
+                            Artikel Saya
+                        </a>
+                    @endif
 
                 </div>
             @endif

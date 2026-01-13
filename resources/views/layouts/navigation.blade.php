@@ -23,7 +23,7 @@
                             <div class="relative" @mouseenter="openIndex = true" @mouseleave="openIndex = false">
                                 <button
                                     class="inline-flex items-center px-3 py-2 border-b-2 text-sm font-medium focus:outline-none transition ease-in-out duration-150
-                                                                                        {{ request()->routeIs('category.show') ? 'border-blue-500 text-gray-900' : 'border-transparent text-gray-700 hover:text-gray-900 hover:border-gray-300' }}">
+                                                                                                {{ request()->routeIs('category.show') ? 'border-blue-500 text-gray-900' : 'border-transparent text-gray-700 hover:text-gray-900 hover:border-gray-300' }}">
                                     {{ __('Index') }}
                                     <svg :class="{ 'rotate-180': openIndex }"
                                         class="ms-1 h-4 w-4 transform transition-transform duration-200"
@@ -42,7 +42,7 @@
                                         @foreach ($categories as $category)
                                             <a href="{{ route('category.show', $category->id) }}"
                                                 class="block px-4 py-2 text-sm rounded-sm transition-colors duration-150
-                                                                                                                    {{ request()->is('category/' . $category->id) ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }}">
+                                                                                                                                {{ request()->is('category/' . $category->id) ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }}">
                                                 {{ $category->name }}
                                             </a>
                                         @endforeach
@@ -115,8 +115,13 @@
 
             <!-- Hamburger -->
             <div class="-me-2 flex items-center sm:hidden">
+                <!-- Notifications Bell for Mobile -->
+                @if (Auth::check())
+                    <x-notification-dropdown />
+                @endif
+
                 <button @click="open = !open"
-                    class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none transition duration-150 ease-in-out">
+                    class="ml-2 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none transition duration-150 ease-in-out">
                     <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                         <path :class="{ 'hidden': open, 'inline-flex': !open }" class="inline-flex"
                             stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -146,7 +151,7 @@
                         @foreach ($categories as $category)
                             <a href="{{ route('category.show', $category->id) }}"
                                 class="block px-3 py-1.5 text-sm rounded-md 
-                                                                                                                           {{ request()->is('category/' . $category->id) ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-gray-700 hover:bg-gray-100' }}">
+                                                                                                                                       {{ request()->is('category/' . $category->id) ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-gray-700 hover:bg-gray-100' }}">
                                 {{ $category->name }}
                             </a>
                         @endforeach
@@ -176,6 +181,10 @@
 
                     <x-responsive-nav-link :href="route('bookmarks.index')">
                         {{ __('Bookmarks') }}
+                    </x-responsive-nav-link>
+
+                    <x-responsive-nav-link :href="route('notifications.index')">
+                        {{ __('Riwayat Notifikasi') }}
                     </x-responsive-nav-link>
 
                     <form method="POST" action="{{ route('logout') }}">

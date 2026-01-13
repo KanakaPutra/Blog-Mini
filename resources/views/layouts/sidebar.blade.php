@@ -109,7 +109,7 @@
                 <div class="relative border-l-2 border-gray-100 pl-2 ml-1 py-1 space-y-1">
                     @foreach (\App\Models\Category::all() as $category)
                                     <a href="{{ route('category.show', $category->id) }}" class="block px-3 py-2 text-sm rounded-lg transition-all duration-200
-                                                                           {{ request()->is('category/' . $category->id)
+                                                                                           {{ request()->is('category/' . $category->id)
                         ? 'bg-blue-50 text-blue-600 font-semibold'
                         : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50 hover:pl-4' }}">
                                         {{ $category->name }}
@@ -135,7 +135,7 @@
                     @foreach (\App\Models\Category::all() as $category)
                         <a href="{{ route('category.show', $category->id) }}"
                             class="block px-4 py-2.5 text-sm rounded-lg transition-colors duration-150
-                                    {{ request()->is('category/' . $category->id) ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                                        {{ request()->is('category/' . $category->id) ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                             {{ $category->name }}
                         </a>
                     @endforeach
@@ -157,7 +157,7 @@
 
         @if(auth()->user()->is_admin >= 1)
             <a href="{{ route('articles.index') }}" class="relative flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-300 ease-out group
-                                       {{ request()->routeIs('articles.index')
+                                           {{ request()->routeIs('articles.index')
             ? 'bg-blue-50/80 text-blue-600 shadow-sm ring-1 ring-blue-100'
             : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:translate-x-1' }}">
                 <div class="flex-shrink-0 w-6 h-6 flex items-center justify-center">
@@ -181,6 +181,33 @@
                     </div>
                 </div>
             </a>
+
+            <!-- Bookmarks for Admin -->
+            <a href="{{ route('bookmarks.index') }}" class="relative flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-300 ease-out group
+                                           {{ request()->routeIs('bookmarks.index')
+            ? 'bg-blue-50/80 text-blue-600 shadow-sm ring-1 ring-blue-100'
+            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:translate-x-1' }}">
+                <div class="flex-shrink-0 w-6 h-6 flex items-center justify-center">
+                    <svg class="h-5 w-5 {{ request()->routeIs('bookmarks.index') ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-600' }}"
+                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                    </svg>
+                </div>
+                <span class="ml-3 whitespace-nowrap font-medium" x-show="sidebarOpen || mobileOpen" x-cloak
+                    x-transition:enter="delay-100 transition ease-out duration-300"
+                    x-transition:enter-start="opacity-0 translate-x-2" x-transition:enter-end="opacity-100 translate-x-0"
+                    x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100"
+                    x-transition:leave-end="opacity-0">{{ __('Bookmarks') }}</span>
+
+                <!-- Tooltip -->
+                <div class="absolute left-full top-1/2 transform -translate-y-1/2 ml-4 px-3 py-1.5 bg-gray-900 text-white text-xs font-medium rounded-lg opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 pointer-events-none whitespace-nowrap z-50 shadow-xl"
+                    x-show="!sidebarOpen && !mobileOpen">
+                    {{ __('Bookmarks') }}
+                    <div class="absolute left-0 top-1/2 -translate-x-1 -translate-y-1/2 w-2 h-2 bg-gray-900 rotate-45">
+                    </div>
+                </div>
+            </a>
         @endif
 
         @if(auth()->user()->is_admin == 2)
@@ -193,7 +220,7 @@
             </div>
 
             <a href="{{ route('superadmin.users') }}" class="relative flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-300 ease-out group
-                                       {{ request()->routeIs('superadmin.users')
+                                           {{ request()->routeIs('superadmin.users')
             ? 'bg-blue-50/80 text-blue-600 shadow-sm ring-1 ring-blue-100'
             : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:translate-x-1' }}">
                 <div class="flex-shrink-0 w-6 h-6 flex items-center justify-center">
@@ -219,7 +246,7 @@
             </a>
 
             <a href="{{ route('superadmin.settings') }}" class="relative flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-300 ease-out group
-                                       {{ request()->routeIs('superadmin.settings')
+                                           {{ request()->routeIs('superadmin.settings')
             ? 'bg-blue-50/80 text-blue-600 shadow-sm ring-1 ring-blue-100'
             : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:translate-x-1' }}">
                 <div class="flex-shrink-0 w-6 h-6 flex items-center justify-center">
@@ -287,6 +314,16 @@
                     {{ __('Riwayat Like') }}
                 </a>
 
+                <a href="{{ route('bookmarks.index') }}"
+                    class="flex items-center px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition-colors duration-200 group">
+                    <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-blue-500 transition-colors"
+                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                    </svg>
+                    {{ __('Bookmarks') }}
+                </a>
+
                 <a href="{{ route('notifications.index') }}"
                     class="flex items-center px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition-colors duration-200 group">
                     <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-blue-500 transition-colors"
@@ -329,7 +366,8 @@
                     x-transition:leave="transition ease-in duration-100" x-transition:leave-start="opacity-100"
                     x-transition:leave-end="opacity-0">
                     <div class="font-bold text-sm text-gray-800 leading-tight">{{ $authenticatedUser->name }}</div>
-                    <div class="font-normal text-xs text-gray-500 truncate max-w-[9rem]">{{ $authenticatedUser->email }}</div>
+                    <div class="font-normal text-xs text-gray-500 truncate max-w-[9rem]">{{ $authenticatedUser->email }}
+                    </div>
                 </div>
             </div>
             <svg :class="{ 'rotate-180': openProfile }" x-show="sidebarOpen || mobileOpen"

@@ -16,36 +16,38 @@ class ArticleController extends Controller
     {
         $user = Auth::user();
 
-        // SUPER ADMIN
-        if ($user && $user->is_admin == 2) {
-            if ($request->filter === 'mine') {
-                $articles = Article::with(['category', 'user'])
-                    ->where('user_id', $user->id)
-                    ->latest()
-                    ->get();
-            } else {
-                $query = Article::with(['category', 'user'])
-                    ->where('suspended', false);
+        // ADMIN & SUPER ADMIN
+        if ($user && $user->is_admin >= 1) {
+            $query = Article::with(['category', 'user']);
 
-                // Jika filter bukan 'all', tampilkan hanya yang sudah publish secara default
-                // agar admin tidak bingung mana yang sudah live dan mana yang belum.
-                if ($request->filter !== 'all') {
-                    $query->published();
+            // SUPER ADMIN (is_admin == 2)
+            if ($user->is_admin == 2) {
+                if ($request->filter === 'mine') {
+                    $query->where('user_id', $user->id);
+                } else {
+                    $query->where('suspended', false);
                 }
-
-                $articles = $query->latest()->get();
+            }
+            // ADMIN (is_admin == 1) -> Defaultnya cuma lihat punyanya sendiri
+            else {
+                $query->where('user_id', $user->id);
             }
 
-            return view('articles.index', compact('articles'));
-        }
+            // FILTER LOGIC (berlaku untuk keduanya dalam konteks masing-masing)
+            if ($request->filter === 'pending') {
+                $query->where(function ($q) {
+                    $q->where('status', 'draft')
+                        ->orWhere(function ($sq) {
+                            $sq->where('status', 'published')
+                                ->where('published_at', '>', now());
+                        });
+                });
+            } else {
+                // Default view: Hanya yang sudah live (berdasarkan context query di atas)
+                $query->published();
+            }
 
-        // ADMIN → hanya artikelnya sendiri
-        if ($user && $user->is_admin == 1) {
-            $articles = Article::with(['category', 'user'])
-                ->where('user_id', $user->id)
-                ->latest()
-                ->get();
-
+            $articles = $query->latest()->get();
             return view('articles.index', compact('articles'));
         }
 

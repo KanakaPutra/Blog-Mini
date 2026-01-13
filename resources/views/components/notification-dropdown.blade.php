@@ -1,4 +1,5 @@
-<div class="relative ms-3" x-data="{ openNotifications: false }" @mouseenter="openNotifications = true"
+<div class="relative ms-3" x-data="{ openNotifications: false }" @click="openNotifications = !openNotifications"
+    @click.outside="openNotifications = false" @mouseenter="openNotifications = true"
     @mouseleave="openNotifications = false">
     <button
         class="inline-flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150 relative">
