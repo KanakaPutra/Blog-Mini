@@ -1,211 +1,333 @@
 <x-app-layout>
-    <div class="max-w-6xl mx-auto py-10 px-6" x-data="{ show: false }" x-init="setTimeout(() => show = true, 100)">
+    <div class="max-w-[1440px] mx-auto py-12 px-6 lg:px-12" x-data="{ show: false }"
+        x-init="setTimeout(() => show = true, 50)">
 
-        <!-- 📰 Header ala The Archipelago Times -->
-        <!-- 📰 Header ala The Archipelago Times -->
-        <div x-show="show" x-transition:enter="transition ease-out duration-700"
-            x-transition:enter-start="opacity-0 translate-y-5" x-transition:enter-end="opacity-100 translate-y-0"
-            class="flex flex-col md:flex-row items-center justify-between mb-10 border-b-4 border-double border-gray-800 pb-6 gap-6 md:gap-0">
+        <!-- 🌐 Modern Symmetrical Header -->
+        <div x-show="show" x-transition:enter="transition ease-out duration-1000"
+            x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0"
+            class="mb-16 border-b border-gray-100 pb-12">
 
-            <!-- Kiri: tanggal -->
-            <div class="text-center md:text-left order-2 md:order-1 w-full md:w-1/3">
-                <div
-                    class="text-gray-600 text-sm font-serif hover:text-gray-900 transition-colors duration-300 cursor-default">
-                    <p class="uppercase tracking-widest text-xs font-bold mb-1">
-                        {{ \Carbon\Carbon::now('Asia/Jakarta')->translatedFormat('l, F d, Y') }}
-                    </p>
-                    <p class="italic text-lg">Today's Paper</p>
-                </div>
-            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 items-center gap-10 lg:gap-6">
 
-            <!-- Tengah: logo -->
-            <div class="flex-shrink-0 text-center order-1 md:order-2 w-full md:w-1/3">
-                <div class="group relative inline-block">
-                    <img src="{{ asset('images/the-times.png') }}" alt="The Archipelago Times"
-                        class="w-[280px] md:w-[400px] h-auto object-contain mx-auto transform transition-transform duration-500 group-hover:scale-105 filter drop-shadow-sm">
+                <!-- Left: Date & Info -->
+                <div class="order-2 lg:order-1 flex flex-col items-center lg:items-start gap-1">
+                    <span class="text-[10px] font-black text-blue-700 uppercase tracking-[0.3em]">Live Updates</span>
                     <div
-                        class="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gray-800 transition-all duration-300 group-hover:w-1/2 opacity-0 group-hover:opacity-100">
-                    </div>
-                </div>
-            </div>
-
-            <!-- Kanan: info saham (Carousel) -->
-            <div class="text-center md:text-right order-3 w-full md:w-1/3 font-serif">
-                <div class="inline-block" id="ticker-container">
-                    <!-- Data will be populated by JS -->
-                    <div id="ticker-content" class="transition-opacity duration-500 opacity-100">
-                        <div class="flex flex-col items-center md:items-end">
-                            <span class="text-xs text-gray-500 uppercase tracking-wide mb-1">Market Watch</span>
-                            <span id="ticker-price" class="font-bold text-base flex items-center gap-1">
-                                Loading...
-                            </span>
-                            <span id="ticker-change" class="text-xs px-2 py-0.5 rounded-full mt-1">
-                                --
-                            </span>
+                        class="flex flex-col items-center lg:items-start text-gray-600 font-bold uppercase tracking-widest text-[10px]">
+                        <span
+                            class="text-gray-900">{{ \Carbon\Carbon::now('Asia/Jakarta')->translatedFormat('l, d F Y') }}</span>
+                        <div class="flex items-center gap-2 mt-1 opacity-80">
+                            <span>Jakarta, ID</span>
+                            <span class="w-1 h-1 bg-gray-400 rounded-full"></span>
+                            <span id="header-clock"
+                                class="text-gray-900 font-black">{{ \Carbon\Carbon::now('Asia/Jakarta')->format('H:i') }}
+                                WIB</span>
                         </div>
                     </div>
+                </div>
 
-                    <div class="mt-1">
-                        <span class="text-gray-500 text-xs font-mono">
-                            UPDATED: {{ \Carbon\Carbon::now('Asia/Jakarta')->format('H:i') }} WIB
+                <!-- Center: Logo & Edition -->
+                <div class="order-1 lg:order-2 flex flex-col items-center group">
+                    <div class="mb-4">
+                        <span
+                            class="inline-flex px-3 py-1 bg-gray-900 text-white text-[9px] font-black uppercase tracking-[0.2em] rounded-full shadow-lg shadow-gray-200">
+                            The Digital Edition
                         </span>
+                    </div>
+                    <a href="{{ route('dashboard') }}" class="relative block">
+                        <img src="{{ asset('images/the-times.png') }}" alt="The Archipelago Times"
+                            class="w-[280px] md:w-[380px] h-auto object-contain transition-all duration-500 group-hover:scale-[1.03] filter drop-shadow-sm">
+                        <div
+                            class="absolute -bottom-2 left-1/2 -translate-x-1/2 w-0 h-0.5 bg-blue-600 transition-all duration-500 group-hover:w-1/2 opacity-0 group-hover:opacity-100">
+                        </div>
+                    </a>
+                </div>
+
+                <!-- Right: Market Watch -->
+                <div
+                    class="order-3 lg:order-3 flex flex-col items-center lg:items-end gap-3 ">
+                    <div id="ticker-container"
+                        class="relative overflow-hidden bg-white px-5 py-3 rounded-2xl border border-gray-200 shadow-md shadow-blue-500/5 hover:shadow-lg transition-all duration-300 group/market">
+                        <div id="ticker-content"
+                            class="transition-all duration-700 opacity-100 flex flex-col items-center lg:items-end">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="w-1.5 h-1.5 bg-emerald-600 rounded-full animate-pulse"></span>
+                                <span class="text-[9px] font-black text-gray-600 uppercase tracking-widest">Market
+                                    Watch</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <span id="ticker-price"
+                                    class="font-black text-sm tracking-tighter text-gray-900 flex items-center gap-2">Connecting...</span>
+                                <span id="ticker-change" class="text-[10px] font-black px-2 py-0.5 rounded-lg">--</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const tickers = @json($tickers ?? []);
+                    let currentIndex = 0;
+                    const priceEl = document.getElementById('ticker-price');
+                    const changeEl = document.getElementById('ticker-change');
+                    const containerEl = document.getElementById('ticker-content');
+                    const clockEl = document.getElementById('header-clock');
+
+                    function updateClock() {
+                        const now = new Date();
+                        clockEl.innerText = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WIB';
+                    }
+                    setInterval(updateClock, 30000);
+
+                    function updateTicker() {
+                        if (!tickers || tickers.length === 0) return;
+                        const ticker = tickers[currentIndex];
+                        const isUp = parseFloat(ticker.change) > 0;
+                        const colorClass = isUp ? 'text-emerald-600' : 'text-rose-600';
+                        const bgClass = isUp ? 'bg-emerald-50' : 'bg-rose-50';
+
+                        containerEl.style.opacity = '0';
+                        containerEl.style.transform = 'translateX(10px)';
+
+                        setTimeout(() => {
+                            priceEl.className = `font-black text-sm tracking-tighter flex items-center gap-2 ${colorClass}`;
+                            priceEl.innerText = `${ticker.symbol} ${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2 }).format(ticker.price)}`;
+                            changeEl.className = `text-[10px] font-black px-2 py-0.5 rounded-lg ${colorClass} ${bgClass}`;
+                            changeEl.innerText = `${isUp ? '↑' : '↓'} ${Math.abs(parseFloat(ticker.change)).toFixed(4)}%`;
+
+                            containerEl.style.opacity = '1';
+                            containerEl.style.transform = 'translateX(0)';
+                        }, 500);
+                        currentIndex = (currentIndex + 1) % tickers.length;
+                    }
+                    if (tickers.length > 0) { updateTicker(); setInterval(updateTicker, 6000); }
+                });
+            </script>
+        </div>
+
+        @if($articles->isNotEmpty())
+            <!-- 🗞️ Hero / Featured Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-24">
+                @php $featured = $articles->first(); @endphp
+
+                <!-- Main Featured Article -->
+                <div class="lg:col-span-8 group cursor-pointer">
+                    <div class="flex flex-col gap-5">
+                        <div class="aspect-[16/9] w-full overflow-hidden rounded-md bg-gray-100 shadow-xl shadow-blue-900/5">
+                            <img src="{{ $featured->thumbnail_url }}" alt="{{ $featured->title }}" 
+                                 class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105">
+                        </div>
+                        <div class="flex flex-col gap-3">
+                            <div class="flex items-center gap-3">
+                                <span class="bg-blue-700 text-white text-[9px] font-black uppercase tracking-[0.2em] px-2.5 py-0.5 rounded shadow-lg shadow-blue-500/30">
+                                    {{ $featured->category->name ?? 'Update' }}
+                                </span>
+                                <span class="text-[9px] font-bold text-gray-500 uppercase tracking-widest">{{ $featured->created_at->diffForHumans() }}</span>
+                            </div>
+                            <h2 class="text-3xl lg:text-5xl font-black text-gray-900 leading-[1.1] tracking-tighter group-hover:text-blue-700 transition-colors">
+                                <a href="{{ route('articles.show', $featured->id) }}">{{ $featured->title }}</a>
+                            </h2>
+                            <p class="text-gray-700 text-base lg:text-lg leading-relaxed max-w-2xl font-medium">
+                                {{ Str::limit(strip_tags($featured->content), 180, '...') }}
+                            </p>
+                            <div class="flex items-center justify-between pt-5 border-t border-gray-100 mt-1">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-extrabold text-xs ring-2 ring-white shadow-sm">
+                                        {{ substr($featured->user->name, 0, 1) }}
+                                    </div>
+                                    <div class="flex flex-col">
+                                        <span class="text-xs font-black text-gray-900 leading-tight">{{ $featured->user->name }}</span>
+                                        <span class="text-[9px] font-bold text-gray-400 uppercase tracking-widest leading-none">Reporter</span>
+                                    </div>
+                                </div>
+                                @include('partials.article-actions', ['article' => $featured])
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Pass data to JS -->
-                <script>
-                    document.addEventListener('DOMContentLoaded', function () {
-                        const tickers = @json($tickers ?? []);
-                        let currentIndex = 0;
-
-                        const priceEl = document.getElementById('ticker-price');
-                        const changeEl = document.getElementById('ticker-change');
-                        const containerEl = document.getElementById('ticker-content');
-
-                        function updateTicker() {
-                            if (tickers.length === 0) {
-                                priceEl.innerText = "Data Unavailable";
-                                return;
-                            }
-
-                            const ticker = tickers[currentIndex];
-                            const isUp = parseFloat(ticker.change) > 0;
-                            const arrow = isUp ? '▲' : '▼';
-                            const colorClass = isUp ? 'text-green-700' : 'text-red-700';
-                            const bgClass = isUp ? 'bg-green-50' : 'bg-red-50';
-
-                            // Fade out
-                            containerEl.classList.remove('opacity-100');
-                            containerEl.classList.add('opacity-0');
-
-                            setTimeout(() => {
-                                // Update content
-                                priceEl.className = `font-bold text-base flex items-center gap-1 ${colorClass}`;
-                                priceEl.innerText = `${ticker.symbol} ${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(ticker.price)}`;
-
-                                changeEl.className = `text-xs px-2 py-0.5 rounded-full mt-1 ${colorClass} ${bgClass}`;
-                                changeEl.innerText = `${isUp ? '+' : ''}${parseFloat(ticker.change).toFixed(4)}% ${arrow}`;
-
-                                // Fade in
-                                containerEl.classList.remove('opacity-0');
-                                containerEl.classList.add('opacity-100');
-                            }, 500); // Wait for fade out
-
-                            currentIndex = (currentIndex + 1) % tickers.length;
-                        }
-
-                        // Initial run
-                        updateTicker();
-
-                        // Cycle every 4 seconds
-                        setInterval(updateTicker, 4000);
-                    });
-                </script>
-            </div>
-        </div>
-
-        <!-- 🧭 Judul Beranda -->
-        <h1 class="text-2xl font-semibold text-gray-800 mb-8 text-left font-serif">
-            Beranda Artikel
-        </h1>
-
-        <!-- 📚 Grid Artikel -->
-        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3" x-show="show"
-            x-transition:enter="transition ease-out duration-700 delay-300"
-            x-transition:enter-start="opacity-0 translate-y-5" x-transition:enter-end="opacity-100 translate-y-0">
-            @foreach($articles as $article)
-                    <div
-                        class="group border border-gray-200 rounded-lg bg-white shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col">
-
-                        @if($article->thumbnail)
-                            <div class="overflow-hidden rounded-t-lg">
-                                <img src="{{ $article->thumbnail_url }}" alt="{{ $article->title }}"
-                                    class="w-full h-48 object-cover transform transition-transform duration-500 group-hover:scale-105">
-                            </div>
-                        @endif
-
-                        <div class="p-4 flex flex-col flex-grow">
-                            <h2 class="text-lg font-semibold text-gray-800 mb-1 font-serif">
-                                {{ $article->title }}
-                            </h2>
-
-                            <p class="text-sm text-gray-500 mb-2">
-                                {{ $article->category->name ?? 'Tidak ada kategori' }} •
-                                {{ $article->user->name ?? 'User tidak ditemukan' }}
-                            </p>
-
-                            <p class="text-xs text-gray-400 mb-3">
-                                Dipublikasikan pada {{ $article->created_at->translatedFormat('d F Y') }}
-                            </p>
-
-                            <p class="text-gray-700 text-sm flex-grow">
-                                {{ Str::limit(strip_tags($article->content), 120, '...') }}
-                            </p>
-
-                            <!-- LIKE + Lihat Selengkapnya -->
-                            <div class="mt-4 border-t pt-3 flex items-center justify-between" x-data="{
-                                        bookmarked: {{ $article->isBookmarkedBy(auth()->user()) ? 'true' : 'false' }},
-                                        toggleBookmark() {
-                                            fetch('{{ route('articles.bookmark', $article->id) }}', {
-                                                method: 'POST',
-                                                headers: {
-                                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                                                    'Accept': 'application/json',
-                                                    'X-Requested-With': 'XMLHttpRequest'
-                                                }
-                                            })
-                                            .then(res => res.json())
-                                            .then(data => {
-                                                if (data.success) {
-                                                    this.bookmarked = data.is_bookmarked;
-                                                }
-                                            })
-                                            .catch(err => console.error(err));
-                                        }
-                                    }">
-
-                                <a href="{{ route('articles.show', $article->id) }}"
-                                    class="text-blue-600 hover:underline text-sm font-medium">
-                                    Lihat Selengkapnya
-                                </a>
-
-                                <div class="flex items-center gap-3">
-                                    <!-- BOOKMARK -->
-                                    @auth
-                                        <button @click="toggleBookmark()" class="transition-colors duration-200"
-                                            :class="bookmarked ? 'text-blue-500' : 'text-gray-400 hover:text-blue-500'">
-                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5"
-                                                :class="bookmarked ? 'fill-current' : 'fill-none'" viewBox="0 0 24 24"
-                                                stroke="currentColor" stroke-width="2">
-                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                    d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                                            </svg>
-                                        </button>
-                                    @endauth
-
-                                    <!-- Tampilkan LIKE saja -->
-                                    <div class="flex items-center gap-1">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 
-                                                    {{ auth()->check() && $article->isLikedBy(auth()->user())
-                ? 'text-red-500 fill-current'
-                : 'text-gray-400 stroke-current fill-none' }}" viewBox="0 0 24 24"
-                                            stroke="currentColor" stroke-width="2">
-                                            <path stroke-linecap="round" stroke-linejoin="round"
-                                                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                        </svg>
-                                        <span class="text-sm font-semibold text-gray-700">
-                                            {{ $article->totalLikes() }}
-                                        </span>
+                <!-- Trending / Side Panel -->
+                <div class="lg:col-span-4 border-l border-gray-100 lg:pl-10 flex flex-col gap-8">
+                    <h3 class="text-[10px] font-black uppercase tracking-[0.4em] text-gray-900 border-b-2 border-gray-900 pb-3">Most Popular</h3>
+                    <div class="flex flex-col gap-10">
+                        @foreach($articles->slice(1, 4) as $index => $side)
+                            <div class="flex flex-col gap-3 group">
+                                <div class="flex items-start gap-3">
+                                    <span class="text-4xl font-black text-gray-100 group-hover:text-blue-600 transition-colors leading-[0.8]">0{{ $index + 1 }}</span>
+                                    <div class="flex flex-col gap-1.5">
+                                        <span class="text-[9px] font-black uppercase tracking-widest text-blue-700">{{ $side->category->name ?? 'Focus' }}</span>
+                                        <h4 class="text-lg font-extrabold text-gray-900 leading-tight group-hover:text-blue-700 transition-colors tracking-tight">
+                                            <a href="{{ route('articles.show', $side->id) }}">{{ $side->title }}</a>
+                                        </h4>
                                     </div>
+                                </div>
+                                <div class="flex items-center justify-between pt-3 border-t border-gray-50 border-dashed">
+                                    <span class="text-[9px] font-bold text-gray-500 uppercase tracking-widest">{{ $side->created_at->translatedFormat('d M') }}</span>
+                                    @include('partials.article-actions', ['article' => $side])
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+
+            <!-- 📊 Bloomberg-Style Feed Grid -->
+            <div class="mb-24">
+                <div class="flex items-baseline justify-between mb-8 border-b-2 border-gray-900 pb-3">
+                    <h3 class="text-2xl font-black text-gray-900 uppercase tracking-tighter italic">The Briefing</h3>
+                    <div class="flex items-center border border-gray-100 rounded-lg p-0.5 bg-gray-50">
+                        <button class="text-[9px] font-black uppercase tracking-widest px-3 py-1.5 bg-white rounded shadow-sm text-blue-700">All Posts</button>
+                        <button class="text-[9px] font-black uppercase tracking-widest px-3 py-1.5 text-gray-400 hover:text-gray-900">Analysis</button>
+                        <button class="text-[9px] font-black uppercase tracking-widest px-3 py-1.5 text-gray-400 hover:text-gray-900">Opinion</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-y-12 border-b border-gray-100 pb-12">
+                    @foreach($articles->skip(5)->take(8) as $gridItem)
+                        <div class="flex flex-col gap-5 md:px-4 md:first:pl-0 md:last:pr-0 md:border-r border-gray-100 md:last:border-0 group">
+                            <div class="aspect-[3/2] w-full overflow-hidden rounded-md bg-gray-50 shadow-md shadow-gray-200/50">
+                                <img src="{{ $gridItem->thumbnail_url }}" alt="{{ $gridItem->title }}" 
+                                     class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+                            </div>
+                            <div class="flex flex-col gap-2">
+                                <span class="text-[9px] font-black uppercase tracking-[0.2em] text-blue-700">{{ $gridItem->category->name ?? 'News' }}</span>
+                                <h4 class="text-base lg:text-lg font-extrabold text-gray-900 leading-tight tracking-tight group-hover:text-blue-700 transition-colors line-clamp-3">
+                                    <a href="{{ route('articles.show', $gridItem->id) }}">{{ $gridItem->title }}</a>
+                                </h4>
+                                <div class="flex items-center justify-between pt-4 border-t border-gray-100 mt-1">
+                                    <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest">{{ $gridItem->created_at->translatedFormat('d M Y') }}</span>
+                                    @include('partials.article-actions', ['article' => $gridItem])
                                 </div>
                             </div>
                         </div>
-                    </div>
-            @endforeach
-        </div>
+                    @endforeach
+                </div>
+            </div>
 
-        @if($articles->isEmpty())
-            <p class="text-gray-500 mt-10 text-center font-serif">Belum ada artikel.</p>
+            <!-- 🏛️ Editorial "Section Buckets" -->
+            @php
+                $categorized = $articles->groupBy(fn($a) => $a->category->name ?? 'Uncategorized')->take(3);
+            @endphp
+            <div class="space-y-24">
+                @foreach($categorized as $categoryName => $catArticles)
+                    <section class="border-t-2 border-gray-900 pt-10">
+                        <div class="flex items-center justify-between mb-12 px-2">
+                            <h3 class="text-3xl lg:text-4xl font-black text-gray-900 tracking-tighter uppercase italic leading-none">{{ $categoryName }}</h3>
+                            <a href="#" class="text-[9px] font-black text-gray-900 uppercase tracking-[0.3em] border-[1.5px] border-gray-900 px-4 py-1.5 hover:bg-gray-900 hover:text-white transition-all">View {{ $categoryName }}</a>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+                            <!-- Left Big Story -->
+                            <div class="lg:col-span-7 lg:border-r border-gray-100 lg:pr-10 group">
+                                @php $bigCat = $catArticles->first(); @endphp
+                                <div class="flex flex-col gap-6">
+                                    <div class="aspect-[16/10] w-full overflow-hidden rounded-md shadow-xl shadow-gray-900/10">
+                                        <img src="{{ $bigCat->thumbnail_url }}" alt="{{ $bigCat->title }}" 
+                                             class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105">
+                                    </div>
+                                    <div class="flex flex-col gap-3">
+                                        <h4 class="text-2xl lg:text-3xl font-extrabold text-gray-900 leading-tight tracking-tighter group-hover:text-blue-700 transition-colors">
+                                            <a href="{{ route('articles.show', $bigCat->id) }}">{{ $bigCat->title }}</a>
+                                        </h4>
+                                        <p class="text-gray-700 text-sm lg:text-base leading-relaxed font-medium">
+                                            {{ Str::limit(strip_tags($bigCat->content), 150, '...') }}
+                                        </p>
+                                        <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                                            <span class="text-[9px] font-black text-gray-500 uppercase tracking-widest">{{ $bigCat->created_at->translatedFormat('d M Y') }}</span>
+                                            @include('partials.article-actions', ['article' => $bigCat])
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right Side List -->
+                            <div class="lg:col-span-5 flex flex-col gap-6 lg:mt-0 mt-10">
+                                @foreach($catArticles->skip(1)->take(3) as $catItem)
+                                    <div class="flex gap-4 md:gap-5 group pb-6 border-b border-gray-50 last:border-0 last:pb-0">
+                                        <div class="flex-shrink-0 w-20 h-20 md:w-28 md:h-28 rounded-md overflow-hidden bg-gray-50 border border-gray-200">
+                                            <img src="{{ $catItem->thumbnail_url }}" alt="{{ $catItem->title }}" 
+                                                 class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
+                                        </div>
+                                        <div class="flex flex-col justify-center gap-1.5 flex-1 min-w-0">
+                                            <h4 class="text-base font-extrabold text-gray-900 leading-tight group-hover:text-blue-700 transition-colors font-sans tracking-tight line-clamp-2">
+                                                <a href="{{ route('articles.show', $catItem->id) }}">{{ $catItem->title }}</a>
+                                            </h4>
+                                            <p class="text-[10px] text-gray-600 font-bold line-clamp-1 md:line-clamp-2 leading-relaxed">
+                                                {{ Str::limit(strip_tags($catItem->content), 70, '...') }}
+                                            </p>
+                                            <div class="flex items-center gap-3 mt-0.5">
+                                                <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest">{{ $catItem->created_at->translatedFormat('d M') }}</span>
+                                                @include('partials.article-actions', ['article' => $catItem])
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    </section>
+                @endforeach
+            </div>
+        @else
+            <div class="py-32 text-center flex flex-col items-center gap-6">
+                <div class="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center text-gray-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                            d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9.5a2.5 2.5 0 00-2.5-2.5H15" />
+                    </svg>
+                </div>
+                <p class="text-gray-400 text-2xl font-black uppercase tracking-tighter italic">The archives are empty.</p>
+                <div class="w-12 h-1 bg-blue-600 rounded-full"></div>
+            </div>
         @endif
     </div>
-</x-app-layout>
+
+    <!-- ☁️ Ultra-Clean Footer -->
+    <footer class="bg-gray-900 text-white mt-40">
+        <div class="max-w-[1440px] mx-auto px-6 lg:px-12 py-24">
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-16">
+                <div class="lg:col-span-2 flex flex-col gap-8">
+                    <h2 class="text-5xl font-black tracking-tighter uppercase leading-none">THE TIMES.</h2>
+                    <p class="text-gray-400 text-lg leading-relaxed max-w-sm font-medium opacity-80">Empowering the
+                        world through bold, independent journalism. The core of the archipelago, delivered globally.</p>
+                    <div class="flex flex-wrap gap-3 sm:gap-6">
+                        @foreach(['Twitter', 'Instagram', 'LinkedIn', 'Youtube'] as $social)
+                            <a href="#"
+                                class="text-[10px] font-black uppercase tracking-[0.2em] text-white hover:text-blue-400 transition-colors border border-white/10 px-4 py-2 rounded-full cursor-pointer whitespace-nowrap">{{ $social }}</a>
+                        @endforeach
+                    </div>
+                </div>
+                <div class="flex flex-col gap-6">
+                    <h3 class="text-xs font-black uppercase tracking-widest text-blue-500">Corporate</h3>
+                    <div class="flex flex-col gap-3 text-sm font-bold text-gray-400">
+                        <a href="#" class="hover:text-white transition-colors">Our History</a>
+                        <a href="#" class="hover:text-white transition-colors">Ethics Policy</a>
+                        <a href="#" class="hover:text-white transition-colors">Career</a>
+                        <a href="#" class="hover:text-white transition-colors">Advertise</a>
+                    </div>
+                </div>
+                <div class="flex flex-col gap-6">
+                    <h3 class="text-xs font-black uppercase tracking-widest text-blue-500">Stay Updated</h3>
+                    <p class="text-xs text-gray-500 leading-relaxed font-bold uppercase tracking-widest">Get our weekly
+                        insights delivered directly to your inbox.</p>
+                    <div class="flex border-b border-gray-700 pb-2">
+                        <input type="text" placeholder="EMAIL ADDRESS"
+                            class="bg-transparent border-none text-[10px] font-black uppercase tracking-widest focus:ring-0 w-full placeholder:text-gray-700">
+                        <button class="text-blue-500 hover:text-blue-400 font-black text-xs">&rarr;</button>
+                    </div>
+                </div>
+            </div>
+            <div
+                class="mt-24 pt-12 border-t border-white/5 flex flex-col lg:flex-row justify-between items-center gap-6">
+                <span class="text-[10px] font-black text-gray-500 uppercase tracking-widest">&copy; {{ date('Y') }} THE
+                    ARCHIPELAGO TIMES GROUP. ALL RIGHTS RESERVED.</span>
+                <div class="flex gap-8 text-[10px] font-black text-gray-500 uppercase tracking-widest">
+                    <a href="#" class="hover:text-white transition-colors">Privacy Policy</a>
+                    <a href="#" class="hover:text-white transition-colors">Terms of Service</a>
+                    <a href="#" class="hover:text-white transition-colors">Cookie Settings</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+</x-app-layout> 

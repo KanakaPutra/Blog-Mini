@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="overflow-x-hidden">
 
 <head>
     <meta charset="utf-8">
@@ -21,18 +21,18 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
-<body class="font-sans antialiased">
+<body class="font-sans antialiased overflow-x-hidden">
     @if(auth()->check() && auth()->user()->is_admin >= 1)
         {{-- ADMIN LAYOUT --}}
         <div class="h-screen bg-gray-100 flex overflow-hidden" x-data="{ 
-                            sidebarOpen: {{ request()->cookie('sidebar_state', 'true') === 'true' ? 'true' : 'false' }}, 
-                            mobileOpen: false,
-                            init() {
-                                this.$watch('sidebarOpen', value => {
-                                    document.cookie = 'sidebar_state=' + value + '; path=/; max-age=31536000; SameSite=Lax';
-                                });
-                            }
-                        }">
+                                    sidebarOpen: {{ request()->cookie('sidebar_state', 'true') === 'true' ? 'true' : 'false' }}, 
+                                    mobileOpen: false,
+                                    init() {
+                                        this.$watch('sidebarOpen', value => {
+                                            document.cookie = 'sidebar_state=' + value + '; path=/; max-age=31536000; SameSite=Lax';
+                                        });
+                                    }
+                                }">
             <!-- Mobile Backdrop -->
             <div class="md:hidden fixed inset-0 z-40 bg-gray-600 bg-opacity-75 transition-opacity" x-show="mobileOpen"
                 x-transition:enter="transition-opacity ease-linear duration-300" x-transition:enter-start="opacity-0"
