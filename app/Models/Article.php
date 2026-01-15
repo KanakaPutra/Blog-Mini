@@ -165,4 +165,22 @@ class Article extends Model
     {
         return $this->status === 'published' && ($this->published_at === null || $this->published_at->isPast());
     }
+
+    public function scopeSearch($query, $search)
+    {
+        $words = explode(' ', $search);
+
+        return $query->where(function ($q) use ($words) {
+            foreach ($words as $word) {
+                $word = trim($word);
+                if ($word === '')
+                    continue;
+
+                $q->where(function ($sq) use ($word) {
+                    $sq->where('title', 'ilike', "%{$word}%")
+                        ->orWhere('content', 'ilike', "%{$word}%");
+                });
+            }
+        });
+    }
 }

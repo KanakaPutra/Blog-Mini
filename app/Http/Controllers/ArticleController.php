@@ -20,6 +20,10 @@ class ArticleController extends Controller
         if ($user && $user->is_admin >= 1) {
             $query = Article::with(['category', 'user']);
 
+            if ($request->filled('search')) {
+                $query->search($request->search);
+            }
+
             // SUPER ADMIN (is_admin == 2)
             if ($user->is_admin == 2) {
                 if ($request->filter === 'mine') {
@@ -52,11 +56,15 @@ class ArticleController extends Controller
         }
 
         // USER biasa (Public View)
-        $articles = Article::with(['category', 'user'])
+        $query = Article::with(['category', 'user'])
             ->published()
-            ->where('suspended', false)
-            ->latest()
-            ->get();
+            ->where('suspended', false);
+
+        if ($request->filled('search')) {
+            $query->search($request->search);
+        }
+
+        $articles = $query->latest()->get();
         return view('articles.index', compact('articles'));
     }
 

@@ -41,6 +41,48 @@
     <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto overflow-x-hidden no-scrollbar"
         x-data="{ openIndex: false }">
 
+        <!-- Search Section -->
+        <div class="px-2 mb-6">
+            <div class="relative group">
+                <!-- Search Button (when sidebar closed) -->
+                <button @click="sidebarOpen = true; $nextTick(() => $refs.sidebarSearch.focus())" x-show="!sidebarOpen"
+                    class="w-full flex items-center justify-center p-3 rounded-xl text-gray-500 hover:bg-gray-100 hover:text-blue-600 transition-all duration-300 group-hover:scale-110"
+                    x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95"
+                    x-transition:enter-end="opacity-100 scale-100">
+                    <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </button>
+
+                <!-- Search Form (when sidebar open) -->
+                <form action="{{ route('articles.index') }}" method="GET" x-show="sidebarOpen" x-cloak
+                    x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="opacity-0 translate-x-4"
+                    x-transition:enter-end="opacity-100 translate-x-0" class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                    <input x-ref="sidebarSearch" type="text" name="search" value="{{ request('search') }}"
+                        placeholder="{{ __('Search articles...') }}"
+                        class="block w-full pl-9 pr-3 py-2.5 text-sm rounded-xl bg-gray-50 text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 shadow-sm border border-transparent focus:border-blue-500/30">
+                </form>
+
+                <!-- Tooltip for closed state -->
+                <div x-show="!sidebarOpen" x-cloak
+                    class="absolute left-full top-1/2 transform -translate-y-1/2 ml-4 px-3 py-1.5 bg-gray-900 text-white text-xs font-medium rounded-lg opacity-0 translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 pointer-events-none whitespace-nowrap z-50 shadow-xl">
+                    {{ __('Search') }}
+                    <div class="absolute left-0 top-1/2 -translate-x-1 -translate-y-1/2 w-2 h-2 bg-gray-900 rotate-45">
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Dashboard -->
         <a href="{{ route('dashboard') }}" class="relative flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-300 ease-out group
            {{ request()->routeIs('dashboard')
@@ -109,7 +151,7 @@
                 <div class="relative border-l-2 border-gray-100 pl-2 ml-1 py-1 space-y-1">
                     @foreach (\App\Models\Category::all() as $category)
                                     <a href="{{ route('category.show', $category->id) }}" class="block px-3 py-2 text-sm rounded-lg transition-all duration-200
-                                                                                           {{ request()->is('category/' . $category->id)
+                                                                                                                           {{ request()->is('category/' . $category->id)
                         ? 'bg-blue-50 text-blue-600 font-semibold'
                         : 'text-gray-500 hover:text-gray-900 hover:bg-gray-50 hover:pl-4' }}">
                                         {{ $category->name }}
@@ -135,7 +177,7 @@
                     @foreach (\App\Models\Category::all() as $category)
                         <a href="{{ route('category.show', $category->id) }}"
                             class="block px-4 py-2.5 text-sm rounded-lg transition-colors duration-150
-                                        {{ request()->is('category/' . $category->id) ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
+                                                {{ request()->is('category/' . $category->id) ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900' }}">
                             {{ $category->name }}
                         </a>
                     @endforeach
@@ -157,7 +199,7 @@
 
         @if(auth()->user()->is_admin >= 1)
             <a href="{{ route('articles.index') }}" class="relative flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-300 ease-out group
-                                           {{ request()->routeIs('articles.index')
+                                                   {{ request()->routeIs('articles.index')
             ? 'bg-blue-50/80 text-blue-600 shadow-sm ring-1 ring-blue-100'
             : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:translate-x-1' }}">
                 <div class="flex-shrink-0 w-6 h-6 flex items-center justify-center">
@@ -184,7 +226,7 @@
 
             <!-- Bookmarks for Admin -->
             <a href="{{ route('bookmarks.index') }}" class="relative flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-300 ease-out group
-                                           {{ request()->routeIs('bookmarks.index')
+                                                   {{ request()->routeIs('bookmarks.index')
             ? 'bg-blue-50/80 text-blue-600 shadow-sm ring-1 ring-blue-100'
             : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:translate-x-1' }}">
                 <div class="flex-shrink-0 w-6 h-6 flex items-center justify-center">
@@ -220,7 +262,7 @@
             </div>
 
             <a href="{{ route('superadmin.users') }}" class="relative flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-300 ease-out group
-                                           {{ request()->routeIs('superadmin.users')
+                                                   {{ request()->routeIs('superadmin.users')
             ? 'bg-blue-50/80 text-blue-600 shadow-sm ring-1 ring-blue-100'
             : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:translate-x-1' }}">
                 <div class="flex-shrink-0 w-6 h-6 flex items-center justify-center">
@@ -246,7 +288,7 @@
             </a>
 
             <a href="{{ route('superadmin.settings') }}" class="relative flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-300 ease-out group
-                                           {{ request()->routeIs('superadmin.settings')
+                                                   {{ request()->routeIs('superadmin.settings')
             ? 'bg-blue-50/80 text-blue-600 shadow-sm ring-1 ring-blue-100'
             : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:translate-x-1' }}">
                 <div class="flex-shrink-0 w-6 h-6 flex items-center justify-center">

@@ -23,7 +23,7 @@
                             <div class="relative" @mouseenter="openIndex = true" @mouseleave="openIndex = false">
                                 <button
                                     class="inline-flex items-center px-3 py-2 border-b-2 text-sm font-medium focus:outline-none transition ease-in-out duration-150
-                                                                                                {{ request()->routeIs('category.show') ? 'border-blue-500 text-gray-900' : 'border-transparent text-gray-700 hover:text-gray-900 hover:border-gray-300' }}">
+                                                                                                        {{ request()->routeIs('category.show') ? 'border-blue-500 text-gray-900' : 'border-transparent text-gray-700 hover:text-gray-900 hover:border-gray-300' }}">
                                     {{ __('Index') }}
                                     <svg :class="{ 'rotate-180': openIndex }"
                                         class="ms-1 h-4 w-4 transform transition-transform duration-200"
@@ -42,7 +42,7 @@
                                         @foreach ($categories as $category)
                                             <a href="{{ route('category.show', $category->id) }}"
                                                 class="block px-4 py-2 text-sm rounded-sm transition-colors duration-150
-                                                                                                                                {{ request()->is('category/' . $category->id) ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }}">
+                                                                                                                                            {{ request()->is('category/' . $category->id) ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900' }}">
                                                 {{ $category->name }}
                                             </a>
                                         @endforeach
@@ -52,6 +52,23 @@
                     @endunless
 
 
+                </div>
+
+                <!-- Search Bar -->
+                <div class="hidden sm:flex items-center ms-6 flex-1 max-w-md">
+                    <form action="{{ route('articles.index') }}" method="GET" class="w-full relative group">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 w-5 text-gray-400 group-focus-within:text-blue-500 transition-colors duration-200"
+                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                        <input type="text" name="search" value="{{ request('search') }}"
+                            placeholder="{{ __('Search articles...') }}"
+                            class="block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-xl leading-5 bg-gray-50 text-gray-900 placeholder-gray-500 focus:outline-none focus:bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 sm:text-sm transition-all duration-200 shadow-sm hover:border-gray-300">
+                    </form>
                 </div>
             </div>
 
@@ -136,6 +153,22 @@
 
     <!-- Responsive Navigation Menu -->
     <div :class="{ 'block': open, 'hidden': !open }" class="hidden sm:hidden" x-cloak>
+        <!-- Mobile Search -->
+        <div class="pt-4 pb-2 px-4 border-b border-gray-100 bg-gray-50/50">
+            <form action="{{ route('articles.index') }}" method="GET" class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg class="h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                        stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </div>
+                <input type="text" name="search" value="{{ request('search') }}"
+                    placeholder="{{ __('Search articles...') }}"
+                    class="block w-full pl-9 pr-3 py-2 text-sm border-gray-200 rounded-xl bg-white focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 shadow-sm">
+            </form>
+        </div>
+
         <div class="pt-2 pb-3 space-y-1">
             @unless(auth()->check() && auth()->user()->is_admin >= 1)
                 <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
@@ -151,7 +184,7 @@
                         @foreach ($categories as $category)
                             <a href="{{ route('category.show', $category->id) }}"
                                 class="block px-3 py-1.5 text-sm rounded-md 
-                                                                                                                                       {{ request()->is('category/' . $category->id) ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-gray-700 hover:bg-gray-100' }}">
+                                                                                                                                                   {{ request()->is('category/' . $category->id) ? 'bg-blue-50 text-blue-600 font-semibold' : 'text-gray-700 hover:bg-gray-100' }}">
                                 {{ $category->name }}
                             </a>
                         @endforeach
