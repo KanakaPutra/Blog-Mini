@@ -26,11 +26,13 @@
 - **🚩 Reporting** - User-driven content moderation through article reports
 - **🏷️ Categories** - Organize content with category management
 - **👤 User Profiles** - Customizable user profiles with authentication
+- **🤖 AI Agent** - Smart assistant with context-aware responses
 
 ### 🔐 Authentication & Authorization
 - **Multi-role System** - User, Admin, and Super Admin roles
 - **Laravel Fortify** - Secure authentication with email verification
 - **Protected Routes** - Role-based access control for sensitive operations
+- **🛡️ Spam Protection** - Google reCAPTCHA v2 implementation
 
 ### 🎨 Modern UI/UX
 - **Livewire Components** - Reactive, dynamic interfaces without page reloads
@@ -168,6 +170,7 @@ php artisan test
 - **[Livewire 3](https://livewire.laravel.com)** - Full-stack framework for Laravel
 - **[Laravel Fortify](https://laravel.com/docs/fortify)** - Backend authentication scaffolding
 - **[Flux](https://flux.laravel.com)** - Premium Livewire components
+- **[Google Gemini](https://deepmind.google/technologies/gemini/)** - AI Model for Chat Assistant
 
 ### Frontend
 - **[TailwindCSS 4](https://tailwindcss.com)** - Utility-first CSS framework
@@ -248,6 +251,11 @@ Create, read, update, and delete blog articles with:
 - Edit and delete own comments
 - Real-time updates with Livewire
 - Author attribution
+
+### 🤖 AI Powered Chat
+- **Context Aware** - Understands blog content (articles, categories, stats-
+- **Smart Responses** - Powered by Google Gemini 2.0 Flash
+- **Admin Commands** - Voice-like commands for Super Admin to manage categories (Create/Edit/Delete)
 
 ---
 
