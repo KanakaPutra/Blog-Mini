@@ -261,7 +261,7 @@ Create, read, update, and delete blog articles with:
 
 ## 🎨 Screenshots
 
-> *Coming soon - Add screenshots of your application here*
+![Dashboard](public/images/dashboard.png)
 
 ---
 
