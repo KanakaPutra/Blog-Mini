@@ -14,6 +14,11 @@ class ArticleController extends Controller
 {
     public function index(Request $request)
     {
+        // UNIFY SEARCH: Redirect to Global Search if 'search' param is present
+        if ($request->filled('search')) {
+            return redirect()->route('search.index', ['q' => $request->search]);
+        }
+
         $user = Auth::user();
 
         // ADMIN & SUPER ADMIN

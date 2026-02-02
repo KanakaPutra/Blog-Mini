@@ -208,4 +208,12 @@ Route::middleware(['auth', 'superadmin'])
 | AUTH ROUTES
 |--------------------------------------------------------------------------
 */
+
+/*
+|--------------------------------------------------------------------------
+| GLOBAL SEARCH
+|--------------------------------------------------------------------------
+*/
+Route::get('/search', [App\Http\Controllers\SearchController::class, 'index'])->name('search.index');
+
 require __DIR__ . '/auth.php';
